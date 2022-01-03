@@ -142,15 +142,15 @@ def save_game(upd, ctx):
         text='World map saved'
     )
 
-def find_nation(world, nation):
+def find_nation(world, nation_code):
     nation = filter(
-        lambda nat: nat == nation,
+        lambda nat: nat['Country Code'] == nation_code,
         world
     )
     nation = next(nation, None)
 
     if not nation:
-        return Err(f'{nation} is not a valid nation')
+        return Err(f'{nation_code} is not a valid nation code')
 
     return Ok(nation)
 
@@ -172,7 +172,7 @@ def find_army(world, nation, owner):
         armies.append({'Owner': owner, 'Strength': 0, 'Fighting': []})
         army = armies[-1]
 
-    return army
+    return Ok(army)
 
 def deploy_army(upd, ctx):
     if len(ctx.args) != 2:
@@ -181,7 +181,7 @@ def deploy_army(upd, ctx):
         )
         return
 
-    amount = ctx.args[0]
+    amount = int(ctx.args[0])
     nation = ctx.args[1]
     owner = upd.message.from_user.username
 
