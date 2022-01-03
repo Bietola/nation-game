@@ -5,6 +5,10 @@ import re
 from pathlib import Path
 from collections import defaultdict
 import json
+import pandas as pd
+import plotly.express as px
+from pathlib import Path
+
 
 import emoji_utils as emjutl
 
@@ -14,21 +18,23 @@ g_chosen_flag = {}
 RECV_ANS = range(1)
 
 
-g_db = defaultdict(
+g_db = {}
+g_db['players'] = defaultdict(
     lambda: {'points': 0},
-    json.loads(Path('./assets/nation-game.json').open().read())
+    json.loads(Path('./assets/players.json').open().read())
 )
+g_db['world'] = json.loads(Path('./assets/world.json').open().read())
 
 
-def db():
+def db(field):
     global g_db
-    return g_db
+    return g_db[field]
 
 
-def flush_db():
+def flush_db(field):
     global g_db
-    Path('./assets/nation-game.json').write_text(
-        json.dumps(g_db),
+    Path(f'./assets/{field}.json').write_text(
+        json.dumps(g_db[field]),
         encoding="utf-8"
     )
 
@@ -70,7 +76,7 @@ def receive_ans(upd, ctx):
     user = upd.message.from_user
 
     if upd.message.text.lower() == 'ranking':
-        upd.message.reply_text(db())
+        upd.message.reply_text(db('players'))
         return RECV_ANS
 
     elif upd.message.text.lower() == 'cheat':
@@ -82,14 +88,14 @@ def receive_ans(upd, ctx):
         return ConversationHandler.END
 
     elif upd.message.text.lower() == extract_flag_name(g_chosen_flag['name']).lower():
-        winner_data = db()[user.username]
+        winner_data = db('players')[user.username]
 
         upd.message.reply_text(
             f'{user.name} is the winner [points: {winner_data["points"] + 1}]')
 
         # Record win
         winner_data['points'] += 1
-        flush_db()
+        flush_db('palyers')
 
         return ConversationHandler.END
 
@@ -101,9 +107,38 @@ def receive_ans(upd, ctx):
 def cancel_round(upd, ctx):
     return ConversationHandler.END
 
+def print_world_map():
+    df = pd.DataFrame.from_dict(
+        db('world')
+    )
+
+    fig = px.choropleth(
+        df,
+        locations='Country Code',
+        color='Price',
+        hover_name='Country Name',
+        title='World Map',
+        color_continuous_scale=px.colors.sequential.PuRd
+    )
+
+    map_path = Path(__file__).parent / 'assets/cache/world-map.png'
+    fig.write_image(map_path)
+
+    return map_path
+
+def show_world_map(upd, ctx):
+    map_path = print_world_map()
+
+    ctx.bot.send_photo(
+        chat_id=upd.effective_chat.id,
+        photo=map_path.open('rb')
+    )
 
 round_handler = ConversationHandler(
-    entry_points=[CommandHandler('ng', start_round)],
+    entry_points=[
+        CommandHandler('ng', start_round),
+        CommandHandler('map', show_world_map)
+    ],
     states={
         RECV_ANS: [MessageHandler(Filters.text, receive_ans)],
         # HANDLE_WIN: [MessageHandler(Filters.photo, photo)]
