@@ -8,15 +8,15 @@ import json
 import pandas as pd
 import plotly.express as px
 from pathlib import Path
-
+from result import Result, Ok, Err
 
 import emoji_utils as emjutl
 
+# Globals
 g_chosen_flag = {}
 
 # Game states
 RECV_ANS = range(1)
-
 
 g_db = {}
 g_db['players'] = defaultdict(
@@ -25,11 +25,9 @@ g_db['players'] = defaultdict(
 )
 g_db['world'] = json.loads(Path('./assets/world.json').open().read())
 
-
 def db(field):
     global g_db
     return g_db[field]
-
 
 def flush_db(field):
     global g_db
@@ -41,7 +39,6 @@ def flush_db(field):
 # Extract name of flag from flag emoji
 def extract_flag_name(flag_emoji_full_name):
     return extract_flag_name.re.match(flag_emoji_full_name).group(1)
-
 
 extract_flag_name.re = re.compile(r'^flag:\s(.*)$')
 
@@ -70,7 +67,6 @@ def start_round(upd, ctx):
     send_txt(g_chosen_flag['emoji'])
 
     return RECV_ANS
-
 
 def receive_ans(upd, ctx):
     user = upd.message.from_user
@@ -103,7 +99,6 @@ def receive_ans(upd, ctx):
         upd.message.reply_text(f'{user.name}, you are wrong D:')
         return RECV_ANS
 
-
 def cancel_round(upd, ctx):
     return ConversationHandler.END
 
@@ -134,10 +129,85 @@ def show_world_map(upd, ctx):
         photo=map_path.open('rb')
     )
 
+def save_game(upd, ctx):
+    flush_db('players')
+    ctx.bot.send_message(
+        chat_id=upd.effective_chat.id,
+        text='Player data saved'
+    )
+
+    flush_db('world')
+    ctx.bot.send_message(
+        chat_id=upd.effective_chat.id,
+        text='World map saved'
+    )
+
+def find_nation(world, nation):
+    nation = filter(
+        lambda nat: nat == nation,
+        world
+    )
+    nation = next(nation, None)
+
+    if not nation:
+        return Err(f'{nation} is not a valid nation')
+
+    return Ok(nation)
+
+
+def find_army(world, nation, owner):
+    nation = find_nation(world, nation)
+    if isinstance(nation, Err):
+        return nation
+    nation = nation.value
+    
+    armies = nation.get('Armies', [])
+
+    army = filter(
+        lambda army: army['Owner'] == owner,
+        armies
+    )
+    army = next(army, None)
+    if not army:
+        armies.append({'Owner': owner, 'Strength': 0, 'Fighting': []})
+        army = armies[-1]
+
+    return army
+
+def deploy_army(upd, ctx):
+    if len(ctx.args) != 2:
+        upd.message.reply_text(
+            'Usage: `/deploy AMOUNT DESTINATION`'
+        )
+        return
+
+    amount = ctx.args[0]
+    nation = ctx.args[1]
+    owner = upd.message.from_user.username
+
+    # TODO: Check if amount is ok
+
+    world = db('world')
+    players = db('players')
+
+    # NB. This creates an empty army if there isn't one
+    army = find_army(world, nation, owner)
+    if isinstance(army, Err):
+        upd.message.reply_text(
+            army.value
+        )
+        return
+    army = army.value
+
+    army['Strength'] += amount
+    players[owner]['points'] -= amount
+
 round_handler = ConversationHandler(
     entry_points=[
         CommandHandler('ng', start_round),
-        CommandHandler('map', show_world_map)
+        CommandHandler('map', show_world_map),
+        CommandHandler('save', save_game),
+        CommandHandler('deploy', deploy_army)
     ],
     states={
         RECV_ANS: [MessageHandler(Filters.text, receive_ans)],

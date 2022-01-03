@@ -10,6 +10,9 @@ import utils
 import register
 import nation_game
 from register import RegChats
+import sim_thread
+
+import war_sim
 
 ####################
 # Global Variables #
@@ -89,7 +92,7 @@ def nation_game_bot(max_spam_lv=1):
         )
     )
 
-    # TODO: Also add query handler
+    # Main handler used to interact with the game
     log(f'Nation game handler active (time: {cur_time()})', spam_lv=2)
     dispatcher.add_handler(nation_game.round_handler)
 
@@ -97,10 +100,16 @@ def nation_game_bot(max_spam_lv=1):
     # Start Things Up #
     ###################
 
-    # # Minecraft server check
-    # threading.Thread(
-    #     target = minecraft.server_inactivity_checker(updater.bot)
-    # ).start()
+    # Start world simulation
+    # TODO: Make sim thread terminations graceful useing the handle
+    # TODO: Add other systems?
+    _war_sim_h = sim_thread.start_sim_thread(
+        name='War',
+        step_fun=war_sim.step,
+        world=nation_game.g_db['world'], # TODO: This is shit
+        ticks_in_sec=50 / 24 / 3600, # 50 ticks = 1 day
+        update_secs=100 # TODO: Tweak
+    )
 
     # Start bot
     updater.start_polling()
