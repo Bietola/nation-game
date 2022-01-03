@@ -1,19 +1,11 @@
 import fire
-import telegram
 from telegram.ext import Updater
 from telegram.ext import CommandHandler
 from functools import *
 from pathlib import Path
-import random
-import os
-import threading
 import time
-import inspect
-import emoji
-import json
 
 import utils
-from utils import eprint, shell, SRC_PATH
 
 import register
 import nation_game
