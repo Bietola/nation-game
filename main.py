@@ -108,7 +108,8 @@ def nation_game_bot(max_spam_lv=1):
         step_fun=war_sim.step,
         world=nation_game.g_db['world'], # TODO: This is shit
         ticks_in_sec=50 / 24 / 3600, # 50 ticks = 1 day
-        update_secs=100 # TODO: Tweak
+        # update_secs=100,
+        update_secs=10 # for DB
     )
 
     # Start bot

@@ -21,10 +21,11 @@ Armies [
 (armies, delta) ->
 fighters = armies.map([Owner, Strength])
 for fgt in fighters:
-    opponents = fgt[Fighting]
-    opps_power = opponents.map([Strength]).sum()
+    opps = fgt[Fighting]
+    opps_power = opps.map([Strength]).sum()
     fgt_power = fgt[Strength]
     death_factor = power_inter_func(fgt_power, opps_power)
         e.g. power_inter_func(100, 25 + 25) -> 2
-    deaths = death_factor * delta
-    fgt[Strength] -= deaths
+
+    for opp in opps:
+        opp[Strength] -= (death_factor / len(opps)) * delta

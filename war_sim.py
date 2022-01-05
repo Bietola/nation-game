@@ -1,17 +1,15 @@
 def size_advantage_interleave(offender_size, opponents_size):
     # TODO: Use normal ditribution to reproduce function in `./notes/advanced-size-adv-interleave.png`
     # TODO: Or just use: `./notes/slightly-more-advanced-size-adv.png`
-    return min(
+    return max(
         1,
         offender_size / opponents_size
     )
 
 def step(world, time_delta):
-    world1 = world
-
     # DB
-    for nation in world1:
-        for army in nation.get('Armies', []):
+    for nation in world:
+        for army in nation['Armies']:
             # TODO: Edge cases (opp_name not found; more than one)
             opponents = list(map(
                 lambda opp_name: next(filter(
@@ -20,6 +18,9 @@ def step(world, time_delta):
                 )),
                 army['Fighting']
             ))
+
+            if len(opponents) == 0:
+                continue
 
             opponents_power = sum([opp['Strength'] for opp in opponents])
             offender_power = army['Strength']
@@ -30,9 +31,11 @@ def step(world, time_delta):
             )
 
             for opp in opponents:
-                opp['Strength'] -= (size_advantage / len(opponents)) * time_delta
+                damage = (size_advantage / len(opponents)) * time_delta
+                print(f'DB: attack! {damage}')
+                opp['Strength'] -= damage
 
-    return world1
+    return world
 
 #########
 # Tests #

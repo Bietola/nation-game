@@ -9,6 +9,9 @@ import pandas as pd
 import plotly.express as px
 from pathlib import Path
 from result import Result, Ok, Err
+import time
+import atomics
+import threading
 
 import emoji_utils as emjutl
 
@@ -175,23 +178,27 @@ def find_army(world, nation, owner):
     return Ok(army)
 
 def deploy_army(upd, ctx):
-    if len(ctx.args) != 2:
+    if len(ctx.args) < 2:
         upd.message.reply_text(
-            'Usage: `/deploy AMOUNT DESTINATION`'
+            'Usage: `/dep NATION_CODE AMOUNT [+/-OPPONENTS]`'
         )
         return
 
-    amount = int(ctx.args[0])
-    nation = ctx.args[1]
+    nation_code = ctx.args[0]
+    amount = int(ctx.args[1])
+    off_opts = ctx.args[2:]
     owner = upd.message.from_user.username
-
-    # TODO: Check if amount is ok
 
     world = db('world')
     players = db('players')
 
+    if amount < players[owner]['points']:
+        upd.message.reply_text(
+            f'Not enough points ({players[owner]["points"]}/{amount})'
+        )
+
     # NB. This creates an empty army if there isn't one
-    army = find_army(world, nation, owner)
+    army = find_army(world, nation_code, owner)
     if isinstance(army, Err):
         upd.message.reply_text(
             army.value
@@ -202,12 +209,153 @@ def deploy_army(upd, ctx):
     army['Strength'] += amount
     players[owner]['points'] -= amount
 
+    res = apply_offensive_opts(owner, nation_code, off_opts)
+    if isinstance(res, Err):
+        upd.message.reply_text(res.value)
+
+    upd.message.reply_text('Sucessfuly deployed')
+
+def apply_offensive_opts(offender, nation, opts):
+    world = db('world')
+
+    # NB. This creates an empty army if there isn't one
+    army = find_army(world, nation, offender)
+    if isinstance(army, Err):
+        return army
+    army = army.value
+
+    for opt in opts:
+        if opt[0] == '-':
+            opp = opt[1:]
+            if opp in army['Fighting']:
+                army['Fighting'].remove(opp)
+            else:
+                return Err(f'ERR: Not fighting {opp}')
+        else:
+            opp = opt
+            if opp in army['Fighting']:
+                return Err(f'ERR: Already fighting {opp}')
+            else:
+                army['Fighting'].append(opp)
+    
+    return Ok()
+
+def begin_offensive(upd, ctx):
+    if len(ctx.args) < 2:
+        upd.message.reply_text(
+            'Usage: `/att NATION_CODE [+/-OPPONENTS]`'
+        )
+        return
+
+    nation = ctx.args[0]
+    opts = ctx.args[1:]
+    owner = upd.message.from_user.username
+
+    res = apply_offensive_opts(owner, nation, opts)
+    if isinstance(res, Err):
+        upd.message.reply_text(res.value)
+    else:
+        upd.message.reply_text('Offensive plan executed')
+
+def show_nation_info(upd, ctx):
+    if len(ctx.args) != 1:
+        upd.message.reply_text(
+            'Usage: nati NATION_CODE'
+        )
+        return
+
+    nation_code = ctx.args[0]
+
+    world = db('world')
+
+    res = find_nation(world, nation_code)
+    if isinstance(res, Err):
+        upd.message.reply_text(res.value)
+    nation = res.value
+
+    upd.message.reply_text(json.dumps(nation, indent=4))
+
+def monitor_armies(upd, ctx):
+    if len(ctx.args) < 1:
+        upd.message.reply_text(
+            'Usage: mon <STOP|NATION_CODE> [UPDATE_SECS=30]'
+        )
+        return
+
+    nation_code = ctx.args[0]
+    update_secs = int(ctx.args[1]) if len(ctx.args) > 1 else 30
+
+    owner = upd.message.from_user
+    username = owner.username
+    threads = monitor_armies.threads
+
+    if nation_code == 'STOP':
+        threads[username][1].store(1)
+        threads[username][0].join()
+        threads.pop(username)
+        return
+
+    world = db('world')
+
+    res = find_nation(world, nation_code)
+    if isinstance(res, Err):
+        upd.message.reply_text(res.value)
+    nation = res.value
+
+    def monitor():
+        while True:
+            # TODO/CC: Use a fixed small time instead to make it possible to stop
+            #          the thread in time. Use a timer interval for `update_secs`
+            time.sleep(update_secs)
+
+            stop_flag = threads[username][1].load()
+            if stop_flag == 1:
+                break
+
+            ctx.bot.send_message(
+                chat_id=owner.id,
+                text=json.dumps(
+                    nation,
+                    indent=4
+                )
+            )
+
+            upd.message.reply_text()
+
+    thread = threading.Thread(target=monitor)
+    stop_flag = atomics.atomic(width=4, atype=atomics.INT)
+    stop_flag.store(0)
+    threads[username] = (thread, stop_flag)
+    upd.message.reply_text(
+        f'Monitoring {nation_code}'
+    )
+    thread.start()
+
+monitor_armies.threads = {}
+
+def show_help(upd, ctx):
+    upd.message.reply_text(
+        '/help: Show this message\n'
+        '/ng: Play a round of *Nation Game*\n'
+        '/map: Show the world map [WIP]\n'
+        '/dep NATION_CODE SOLDIERS_AMOUNT [ENEMIES]: Deploy soldiers\n'
+        '/att NATION_CODE [ENEMIES]: Start offernsive\n'
+        '/nati NATION_CODE: Get info on nation\n'
+        '/mon NATION_CODE TIME: Get sent private nation updates every TIME seconds\n'
+        '/mon STOP: Stop private updates\n'
+        '/save: Save world map and player data'
+    )
+
 round_handler = ConversationHandler(
     entry_points=[
+        CommandHandler('help', show_help),
         CommandHandler('ng', start_round),
         CommandHandler('map', show_world_map),
         CommandHandler('save', save_game),
-        CommandHandler('deploy', deploy_army)
+        CommandHandler('dep', deploy_army),
+        CommandHandler('att', begin_offensive),
+        CommandHandler('nati', show_nation_info),
+        CommandHandler('mon', monitor_armies)
     ],
     states={
         RECV_ANS: [MessageHandler(Filters.text, receive_ans)],
