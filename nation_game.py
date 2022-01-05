@@ -108,18 +108,21 @@ def receive_ans(upd, ctx):
 def cancel_round(upd, ctx):
     return ConversationHandler.END
 
-def print_world_map():
+def print_world_map(get_color, title='World Map', max_color_range=25000):
     df = pd.DataFrame.from_dict(
         db('world')
     )
 
+    df['Color'] = df.apply(get_color, axis=1)
+
     fig = px.choropleth(
         df,
         locations='Country Code',
-        color='Price',
+        color='Color',
         hover_name='Country Name',
-        title='World Map',
-        color_continuous_scale=px.colors.sequential.PuRd
+        title=title,
+        color_continuous_scale='Viridis',
+        range_color=(0, max_color_range)
     )
 
     map_path = Path(__file__).parent / 'assets/cache/world-map.png'
@@ -128,7 +131,17 @@ def print_world_map():
     return map_path
 
 def show_world_map(upd, ctx):
-    map_path = print_world_map()
+    owner = ctx.args[0] if len(ctx.args) > 0 else 'Natives'
+    max_color_range = int(ctx.args[1]) if len(ctx.args) > 1 else 25000
+
+    map_path = print_world_map(
+        title=f'Armies of {owner}',
+        max_color_range=max_color_range,
+        get_color=lambda nation: next(filter(
+            lambda army: army['Owner'] == owner,
+            list(nation['Armies'])
+        ), {'Strength': 0})['Strength'],
+    )
 
     ctx.bot.send_photo(
         chat_id=upd.effective_chat.id,
@@ -212,7 +225,8 @@ def deploy_army(admin=False):
         army = army.value
 
         army['Strength'] += amount
-        players[owner]['points'] -= amount
+        if not admin:
+            players[owner]['points'] -= amount
 
         res = apply_offensive_opts(owner, nation_code, off_opts)
         if isinstance(res, Err):
@@ -297,6 +311,7 @@ def monitor_armies(upd, ctx):
     threads = monitor_armies.threads
 
     if nation_code == 'STOP':
+        upd.message.reply_text('Stopping monitor...')
         threads[username][1].store(1)
         threads[username][0].join()
         threads.pop(username)
@@ -317,6 +332,10 @@ def monitor_armies(upd, ctx):
 
             stop_flag = threads[username][1].load()
             if stop_flag == 1:
+                ctx.bot.send_message(
+                    chat_id=owner.id,
+                    text='Monitoring stopped'
+                )
                 break
 
             ctx.bot.send_message(
@@ -326,8 +345,6 @@ def monitor_armies(upd, ctx):
                     indent=4
                 )
             )
-
-            upd.message.reply_text()
 
     thread = threading.Thread(target=monitor)
     stop_flag = atomics.atomic(width=4, atype=atomics.INT)
@@ -344,7 +361,7 @@ def show_help(upd, ctx):
     upd.message.reply_text(
         '/help: Show this message\n'
         '/ng: Play a round of *Nation Game*\n'
-        '/map: Show the world map [WIP]\n'
+        '/map <PLAYER> <RESOLUTION>: Show the world map with PLAYER army size\n'
         '/dep NATION_CODE SOLDIERS_AMOUNT [ENEMIES]: Deploy soldiers\n'
         '/att NATION_CODE [ENEMIES]: Start offernsive\n'
         '/nati NATION_CODE: Get info on nation\n'
