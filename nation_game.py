@@ -23,7 +23,7 @@ RECV_ANS = range(1)
 
 g_db = {}
 g_db['players'] = defaultdict(
-    lambda: {'points': 0},
+    lambda: {'tot_points': 0, 'points': 0},
     json.loads(Path('./assets/players.json').open().read())
 )
 g_db['world'] = json.loads(Path('./assets/world.json').open().read())
@@ -35,7 +35,7 @@ def db(field):
 def flush_db(field):
     global g_db
     Path(f'./assets/{field}.json').write_text(
-        json.dumps(g_db[field]),
+        json.dumps(g_db[field], indent=4),
         encoding="utf-8"
     )
 
@@ -75,7 +75,7 @@ def receive_ans(upd, ctx):
     user = upd.message.from_user
 
     if upd.message.text.lower() == 'ranking':
-        upd.message.reply_text(db('players'))
+        upd.message.reply_text(json.dumps(db('players'), indent=4))
         return RECV_ANS
 
     elif upd.message.text.lower() == 'cheat':
@@ -88,13 +88,16 @@ def receive_ans(upd, ctx):
 
     elif upd.message.text.lower() == extract_flag_name(g_chosen_flag['name']).lower():
         winner_data = db('players')[user.username]
+        tot_points = winner_data['tot_points']
+        points = winner_data['points']
 
         upd.message.reply_text(
-            f'{user.name} is the winner [points: {winner_data["points"] + 1}]')
+            f'{user.name} is the winner [{points + 1}/{tot_points + 1}]'
+        )
 
         # Record win
         winner_data['points'] += 1
-        flush_db('palyers')
+        winner_data['tot_points'] += 1
 
         return ConversationHandler.END
 
@@ -177,43 +180,47 @@ def find_army(world, nation, owner):
 
     return Ok(army)
 
-def deploy_army(upd, ctx):
-    if len(ctx.args) < 2:
-        upd.message.reply_text(
-            'Usage: `/dep NATION_CODE AMOUNT [+/-OPPONENTS]`'
-        )
-        return
+def deploy_army(admin=False):
+    def handler(upd, ctx):
+        if len(ctx.args) < 2:
+            upd.message.reply_text(
+                'Usage: `/dep NATION_CODE AMOUNT [+/-OPPONENTS]`'
+            )
+            return
 
-    nation_code = ctx.args[0]
-    amount = int(ctx.args[1])
-    off_opts = ctx.args[2:]
-    owner = upd.message.from_user.username
+        nation_code = ctx.args[0]
+        amount = int(ctx.args[1])
+        off_opts = ctx.args[2:]
+        owner = upd.message.from_user.username
 
-    world = db('world')
-    players = db('players')
+        world = db('world')
+        players = db('players')
 
-    if amount < players[owner]['points']:
-        upd.message.reply_text(
-            f'Not enough points ({players[owner]["points"]}/{amount})'
-        )
+        if not admin and amount > players[owner]['points']:
+            upd.message.reply_text(
+                f'Not enough points ({players[owner]["points"]} < {amount})'
+            )
+            return
 
-    # NB. This creates an empty army if there isn't one
-    army = find_army(world, nation_code, owner)
-    if isinstance(army, Err):
-        upd.message.reply_text(
-            army.value
-        )
-        return
-    army = army.value
+        # NB. This creates an empty army if there isn't one
+        army = find_army(world, nation_code, owner)
+        if isinstance(army, Err):
+            upd.message.reply_text(
+                army.value
+            )
+            return
+        army = army.value
 
-    army['Strength'] += amount
-    players[owner]['points'] -= amount
+        army['Strength'] += amount
+        players[owner]['points'] -= amount
 
-    res = apply_offensive_opts(owner, nation_code, off_opts)
-    if isinstance(res, Err):
-        upd.message.reply_text(res.value)
+        res = apply_offensive_opts(owner, nation_code, off_opts)
+        if isinstance(res, Err):
+            upd.message.reply_text(res.value)
 
-    upd.message.reply_text('Sucessfuly deployed')
+        upd.message.reply_text('Sucessfuly deployed')
+
+    return handler
 
 def apply_offensive_opts(offender, nation, opts):
     world = db('world')
@@ -352,10 +359,13 @@ round_handler = ConversationHandler(
         CommandHandler('ng', start_round),
         CommandHandler('map', show_world_map),
         CommandHandler('save', save_game),
-        CommandHandler('dep', deploy_army),
+        CommandHandler('dep', deploy_army()),
         CommandHandler('att', begin_offensive),
         CommandHandler('nati', show_nation_info),
-        CommandHandler('mon', monitor_armies)
+        CommandHandler('mon', monitor_armies),
+
+        # Administrator commands for testing
+        CommandHandler('adep', deploy_army(admin=True)),
     ],
     states={
         RECV_ANS: [MessageHandler(Filters.text, receive_ans)],

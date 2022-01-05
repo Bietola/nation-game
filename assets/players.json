@@ -1,1 +1,26 @@
-{"Dincio": {"points": -30485}, "Bredo_21": {"points": 851}, "Lanky_Kong": {"points": 346}, "null": {"points": 9}, "niggerman88": {"points": 20}, "Chicco420": {"points": 2}, "NiggaCrash": {"points": -100014500}}
+{
+    "Dincio": {
+        "tot_points": 101,
+        "points": 101
+    },
+    "Bredo_21": {
+        "tot_points": 951,
+        "points": 951
+    },
+    "Lanky_Kong": {
+        "tot_points": 446,
+        "points": 446
+    },
+    "niggerman88": {
+        "tot_points": 130,
+        "points": 130
+    },
+    "Chicco420": {
+        "tot_points": 2,
+        "points": 2
+    },
+    "NiggaCrash": {
+        "tot_points": 100,
+        "points": 100
+    }
+}
