@@ -18,6 +18,7 @@ import emoji_utils as emjutl
 # Constants
 NG_PHASE_DELTA = 60 * 5
 WAR_PHASE_DELTA = 60 * 1
+NG_ENABLED_GROUPS = [-1001641644487] # TODO: Make this configurable
 
 # Globals
 g_chosen_flag = {}
@@ -67,6 +68,10 @@ def start_round(upd, ctx):
             chat_id=upd.effective_chat.id,
             text=txt
         )
+
+    if upd.effective_chat.id not in NG_ENABLED_GROUPS:
+        send_txt(f'smh [ng not allowed in group id {-1001641644487}]')
+        return ConversationHandler.END
 
     global g_ng_phase_start_t
     global g_ng_ok
