@@ -15,8 +15,14 @@ import threading
 
 import emoji_utils as emjutl
 
+# Constants
+NG_PHASE_DELTA = 60 * 5
+WAR_PHASE_DELTA = 60 * 1
+
 # Globals
 g_chosen_flag = {}
+g_ng_ok = True
+g_ng_phase_start_t = time.time()
 
 # Game states
 RECV_ANS = range(1)
@@ -62,7 +68,22 @@ def start_round(upd, ctx):
             text=txt
         )
 
-    send_txt('Let the game commence')
+    global g_ng_phase_start_t
+    global g_ng_ok
+    now = time.time()
+    delta = now - g_ng_phase_start_t
+    cur_phase_delta = NG_PHASE_DELTA if g_ng_ok else WAR_PHASE_DELTA
+    if delta > cur_phase_delta:
+        g_ng_phase_start_t = now
+        g_ng_ok = not g_ng_ok
+
+    time_left = round(cur_phase_delta - delta)
+
+    if not g_ng_ok:
+        send_txt(f'No ng you fool, go do war [t-{time_left}]')
+        return ConversationHandler.END
+
+    send_txt(f'Let the game commence [t-{time_left}]')
 
     global g_chosen_flag
     g_chosen_flag = random.choice(
@@ -130,6 +151,9 @@ def print_world_map(get_color, title='World Map', max_color_range=25000):
 
     return map_path
 
+def show_ranking(upd, ctx):
+    upd.message.reply_text(json.dumps(db('players'), indent=4))
+
 def show_world_map(upd, ctx):
     owner = ctx.args[0] if len(ctx.args) > 0 else 'Natives'
     max_color_range = int(ctx.args[1]) if len(ctx.args) > 1 else 25000
@@ -164,6 +188,15 @@ def save_game(upd, ctx):
 def find_nation(world, nation_code):
     nation = filter(
         lambda nat: nat['Country Code'] == nation_code,
+        world
+    )
+    nation = next(nation, None)
+
+    if nation:
+        return Ok(nation)
+
+    nation = filter(
+        lambda nat: nat['Country Name'].lower() == nation_code.lower(),
         world
     )
     nation = next(nation, None)
@@ -236,11 +269,15 @@ def deploy_army(admin=False):
 
     return handler
 
-def apply_offensive_opts(offender, nation, opts):
+def apply_offensive_opts(offender, nation_code, opts):
     world = db('world')
 
     # NB. This creates an empty army if there isn't one
-    army = find_army(world, nation, offender)
+    nation = find_nation(world, nation_code)
+    if isinstance(nation, Err):
+        return nation
+    nation = nation.value
+    army = find_army(world, nation_code, offender)
     if isinstance(army, Err):
         return army
     army = army.value
@@ -256,6 +293,10 @@ def apply_offensive_opts(offender, nation, opts):
             opp = opt
             if opp in army['Fighting']:
                 return Err(f'ERR: Already fighting {opp}')
+            elif opp not in map(
+                    lambda army: army['Owner'],
+                    nation['Armies']):
+                return Err(f'ERR: {opp} not present in {nation["Country Name"]}')
             else:
                 army['Fighting'].append(opp)
     
@@ -281,7 +322,7 @@ def begin_offensive(upd, ctx):
 def show_nation_info(upd, ctx):
     if len(ctx.args) != 1:
         upd.message.reply_text(
-            'Usage: nati NATION_CODE'
+            'Usage: nati (NATION_CODE or NATION_NAME)'
         )
         return
 
@@ -374,6 +415,7 @@ round_handler = ConversationHandler(
     entry_points=[
         CommandHandler('help', show_help),
         CommandHandler('ng', start_round),
+        CommandHandler('rank', show_ranking),
         CommandHandler('map', show_world_map),
         CommandHandler('save', save_game),
         CommandHandler('dep', deploy_army()),
