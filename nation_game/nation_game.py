@@ -37,9 +37,9 @@ g_db = {
     'lock': Lock(),
     'players': defaultdict(
         lambda: {'tot_points': 0, 'points': 0},
-        json.loads(Path('./assets/players.json').open().read())
+        json.loads(Path('./assets/game-data/players.json').open().read())
     ),
-    'world': json.loads(Path('./assets/world.json').open().read())
+    'world': json.loads(Path('./assets/game-data/world.json').open().read())
 }
 
 def db(field):
@@ -54,7 +54,7 @@ def flush_db(field=None):
             flush_db(f)
         return
 
-    Path(f'./assets/{field}.json').write_text(
+    Path(f'./assets/game-data/{field}.json').write_text(
         json.dumps(g_db[field], indent=4),
         encoding="utf-8"
     )
