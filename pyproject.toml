@@ -6,6 +6,16 @@ authors = ["Dincio"]
 
 [tool.poetry.dependencies]
 python = "^3.8"
+fire = "^0.4.0"
+python-telegram-bot = "^13.11"
+graphviz = "^0.19.1"
+lenses = "^1.1.0"
+pandas = "^1.4.1"
+plotly = "^5.6.0"
+result = "^0.7.0"
+atomics = "^1.0.2"
+emoji = "^1.7.0"
+kaleido = "0.2.1"
 
 [tool.poetry.dev-dependencies]
 
