@@ -1,7 +1,9 @@
 from telegram.ext import CommandHandler, ConversationHandler, MessageHandler
 from telegram.ext.filters import Filters
+from numbers import Number
 import random
 import re
+from lenses import lens
 from pathlib import Path
 from collections import defaultdict
 import json
@@ -12,6 +14,8 @@ from result import Result, Ok, Err
 import time
 import atomics
 import threading
+from threading import Lock
+from functools import partial
 
 import emoji_utils as emjutl
 
@@ -28,12 +32,14 @@ g_ng_phase_start_t = time.time()
 # Game states
 RECV_ANS = range(1)
 
-g_db = {}
-g_db['players'] = defaultdict(
-    lambda: {'tot_points': 0, 'points': 0},
-    json.loads(Path('./assets/players.json').open().read())
-)
-g_db['world'] = json.loads(Path('./assets/world.json').open().read())
+g_db = {
+    'lock': Lock(),
+    'players': defaultdict(
+        lambda: {'tot_points': 0, 'points': 0},
+        json.loads(Path('./assets/players.json').open().read())
+    ),
+    'world': json.loads(Path('./assets/world.json').open().read())
+}
 
 def db(field):
     global g_db
@@ -113,6 +119,7 @@ def receive_ans(upd, ctx):
         return ConversationHandler.END
 
     elif upd.message.text.lower() == extract_flag_name(g_chosen_flag['name']).lower():
+        db('lock').acquire()
         winner_data = db('players')[user.username]
         tot_points = winner_data['tot_points']
         points = winner_data['points']
@@ -124,6 +131,8 @@ def receive_ans(upd, ctx):
         # Record win
         winner_data['points'] += 1
         winner_data['tot_points'] += 1
+
+        db('lock').release()
 
         return ConversationHandler.END
 
@@ -210,7 +219,6 @@ def find_nation(world, nation_code):
         return Err(f'{nation_code} is not a valid nation code')
 
     return Ok(nation)
-
 
 def find_army(world, nation, owner):
     nation = find_nation(world, nation)
@@ -340,7 +348,10 @@ def show_nation_info(upd, ctx):
         upd.message.reply_text(res.value)
     nation = res.value
 
-    upd.message.reply_text(json.dumps(nation, indent=4))
+    upd.message.reply_text(json.dumps(
+        (lens.Recur(Number).modify(lambda x: round(x, 2)))(nation),
+        indent=4
+    ))
 
 def monitor_armies(upd, ctx):
     if len(ctx.args) < 1:
@@ -416,20 +427,28 @@ def show_help(upd, ctx):
         '/save: Save world map and player data'
     )
 
+def lock_db(fun, *args):
+    global g_db
+    db('lock').acquire()
+
+    fun(*args)
+
+    db('lock').release()
+
 round_handler = ConversationHandler(
     entry_points=[
         CommandHandler('help', show_help),
         CommandHandler('ng', start_round),
         CommandHandler('rank', show_ranking),
         CommandHandler('map', show_world_map),
-        CommandHandler('save', save_game),
-        CommandHandler('dep', deploy_army()),
-        CommandHandler('att', begin_offensive),
+        CommandHandler('save', partial(lock_db, save_game)),
+        CommandHandler('dep', partial(lock_db, deploy_army())),
+        CommandHandler('att', partial(lock_db, begin_offensive)),
         CommandHandler('nati', show_nation_info),
         CommandHandler('mon', monitor_armies),
 
         # Administrator commands for testing
-        CommandHandler('adep', deploy_army(admin=True)),
+        CommandHandler('adep', partial(lock_db, deploy_army(admin=True))),
     ],
     states={
         RECV_ANS: [MessageHandler(Filters.text, receive_ans)],
