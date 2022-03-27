@@ -1333,14 +1333,14 @@
         "Armies": [
             {
                 "Owner": "Natives",
-                "Strength": 186.09211414836594,
+                "Strength": 180.42833388689422,
                 "Fighting": [
                     "Dincio"
                 ]
             },
             {
                 "Owner": "Dincio",
-                "Strength": 295.89634787880345,
+                "Strength": 292.3662552862102,
                 "Fighting": [
                     "Natives"
                 ]
