@@ -6,7 +6,9 @@ def size_advantage_interleave(offender_size, opponents_size):
         offender_size / opponents_size
     )
 
-def step(world, time_delta):
+def step(game, time_delta):
+    world = game['world']
+
     # Simulate war damage
     for nation in world:
         for army in nation['Armies']:
@@ -58,7 +60,7 @@ def step(world, time_delta):
             nation['Armies']
         )).difference({'Natives'}))
 
-    return world
+    return game
 
 #########
 # Tests #

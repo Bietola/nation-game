@@ -106,7 +106,7 @@ def nation_game_bot(max_spam_lv=1):
     _war_sim_h = sim_thread.start_sim_thread(
         name='War',
         step_fun=war_sim.step,
-        world=nation_game.g_db['world'], # TODO: This is shit
+        game=nation_game.g_db, # TODO: This is shit
         ticks_in_sec=10 * (50 / 24 / 3600), # 50 ticks = 1 day; 10x speedup
         # update_secs=100,
         update_secs=10 # for DB

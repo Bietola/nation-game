@@ -349,7 +349,7 @@ def show_nation_info(upd, ctx):
     nation = res.value
 
     upd.message.reply_text(json.dumps(
-        (lens.Recur(Number).modify(lambda x: round(x, 2)))(nation),
+        lens.Recur(Number).modify(lambda x: round(x, 3))(nation),
         indent=4
     ))
 
