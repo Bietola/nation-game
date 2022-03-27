@@ -1333,17 +1333,8 @@
         "Armies": [
             {
                 "Owner": "Natives",
-                "Strength": 180.42833388689422,
-                "Fighting": [
-                    "Dincio"
-                ]
-            },
-            {
-                "Owner": "Dincio",
-                "Strength": 292.3662552862102,
-                "Fighting": [
-                    "Natives"
-                ]
+                "Strength": 161.52385458209375,
+                "Fighting": []
             }
         ]
     },
@@ -2369,8 +2360,17 @@
         "Armies": [
             {
                 "Owner": "Natives",
-                "Strength": 1598.957080966,
-                "Fighting": []
+                "Strength": 1590.623747632657,
+                "Fighting": [
+                    "Bredo_21"
+                ]
+            },
+            {
+                "Owner": "Bredo_21",
+                "Strength": 932.3020006480971,
+                "Fighting": [
+                    "Natives"
+                ]
             }
         ]
     },

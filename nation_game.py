@@ -1,6 +1,7 @@
 from telegram.ext import CommandHandler, ConversationHandler, MessageHandler
 from telegram.ext.filters import Filters
 from numbers import Number
+import graphviz
 import random
 import re
 from lenses import lens
@@ -263,9 +264,9 @@ def deploy_army(admin=False):
 
         if not admin and amount > players[owner]['points']:
             upd.message.reply_text(
-                f'Not enough points ({players[owner]["points"]} < {amount})'
+                f'Not enough points, deploying all ({players[owner]["points"]})'
             )
-            return
+            amount = players[owner]['points']
 
         # NB. This creates an empty army if there isn't one
         army = find_army(world, nation_code, owner)
@@ -276,8 +277,14 @@ def deploy_army(admin=False):
             return
         army = army.value
 
+        if amount < -army['Strength']:
+            upd.message.reply_text(
+                f'Not enough soldiers, full retreat (-{army["Strength"]})'
+            )
+            amount = -army['Strength']
+
         army['Strength'] += amount
-        if not admin:
+        if not admin or amount < 0:
             players[owner]['points'] -= amount
 
         res = apply_offensive_opts(owner, nation_code, off_opts)
@@ -365,31 +372,25 @@ def show_nation_info(upd, ctx):
         nation['Armies']
     )
 
-    # text = '<br>'.join(lines)  # Newlines represented by HTML '<br>' sequence
-    # layout = px.Layout(
-    #     height=800,
-    #     width=800,
-    #     yaxis=px.layout.YAxis(domain=[0.5, 1]),
-    #     annotations=[
-    #         px.layout.Annotation(
-    #             bordercolor='black',  # Remove this to hide border
-    #             align='left',  # Align text to the left
-    #             yanchor='top', # Align text box's top edge
-    #             text=text,  # Set text with '<br>' strings as newlines
-    #             showarrow=False, # Hide arrow head
-    #             width=650, # Wrap text at around 800 pixels
-    #             xref='paper',  # Place relative to figure, not axes
-    #             yref='paper',
-    #             font={'family': 'Courier'},  # Use monospace font to keep nice indentation
-    #             x=0, # Place on left edge
-    #             y=0.4 # Place a little more than half way down
-    #         )
-    #     ])
-    # fig = px.FigureWidget(data=[{'y': [2, 3, 1]}], layout=layout)
-
     fig = px.pie(df, values='Strength', names='Owner', title='Test')
-    data_path = Path(__file__).parent / 'assets/cache/nation-info.png'
+    data_path = Path(__file__).parent / 'assets/cache/nation-info-armies.png'
     fig.write_image(data_path)
+
+    ctx.bot.send_photo(
+        chat_id=upd.effective_chat.id,
+        photo=data_path.open('rb')
+    )
+
+    # Print attack relationships
+    dot = graphviz.Digraph(comment='Offensive plans')
+    for army in nation['Armies']:
+        dot.node(army['Owner'])
+        for opp in army['Fighting']:
+            dot.edge(army['Owner'], opp)
+
+    data_path = Path(__file__).parent / 'assets/cache/nation-info-att'
+    dot.render(data_path, format='png')
+    data_path = data_path.parent / (data_path.name + '.png')
 
     ctx.bot.send_photo(
         chat_id=upd.effective_chat.id,

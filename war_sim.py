@@ -9,6 +9,13 @@ def size_advantage_interleave(offender_size, opponents_size):
 def step(game, time_delta):
     world = game['world']
 
+    # Kill armies with negative strength
+    for nation in world:
+        nation['Armies'] = list(filter(
+            lambda army: army['Strength'] > 0,
+            nation['Armies']
+        ))
+
     # Simulate war damage
     for nation in world:
         for army in nation['Armies']:
@@ -36,13 +43,6 @@ def step(game, time_delta):
                 damage = (size_advantage / len(opponents)) * time_delta
                 print(f'DB: attack! {damage}')
                 opp['Strength'] -= damage
-
-    # Kill armies with negative strength
-    for nation in world:
-        nation['Armies'] = list(filter(
-            lambda army: army['Strength'] > 0,
-            nation['Armies']
-        ))
 
     # Native armies AI: attack EVERYONE
     for nation in world:
