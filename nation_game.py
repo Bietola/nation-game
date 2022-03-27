@@ -45,8 +45,14 @@ def db(field):
     global g_db
     return g_db[field]
 
-def flush_db(field):
+def flush_db(field=None):
     global g_db
+
+    if not field:
+        for f in ['world', 'players']:
+            flush_db(f)
+        return
+
     Path(f'./assets/{field}.json').write_text(
         json.dumps(g_db[field], indent=4),
         encoding="utf-8"
@@ -352,6 +358,42 @@ def show_nation_info(upd, ctx):
         lens.Recur(Number).modify(lambda x: round(x, 3))(nation),
         indent=4
     ))
+
+    # Print piechart of armies
+    df = pd.DataFrame.from_dict(
+        nation['Armies']
+    )
+
+    # text = '<br>'.join(lines)  # Newlines represented by HTML '<br>' sequence
+    # layout = px.Layout(
+    #     height=800,
+    #     width=800,
+    #     yaxis=px.layout.YAxis(domain=[0.5, 1]),
+    #     annotations=[
+    #         px.layout.Annotation(
+    #             bordercolor='black',  # Remove this to hide border
+    #             align='left',  # Align text to the left
+    #             yanchor='top', # Align text box's top edge
+    #             text=text,  # Set text with '<br>' strings as newlines
+    #             showarrow=False, # Hide arrow head
+    #             width=650, # Wrap text at around 800 pixels
+    #             xref='paper',  # Place relative to figure, not axes
+    #             yref='paper',
+    #             font={'family': 'Courier'},  # Use monospace font to keep nice indentation
+    #             x=0, # Place on left edge
+    #             y=0.4 # Place a little more than half way down
+    #         )
+    #     ])
+    # fig = px.FigureWidget(data=[{'y': [2, 3, 1]}], layout=layout)
+
+    fig = px.pie(df, values='Strength', names='Owner', title='Test')
+    data_path = Path(__file__).parent / 'assets/cache/nation-info.png'
+    fig.write_image(data_path)
+
+    ctx.bot.send_photo(
+        chat_id=upd.effective_chat.id,
+        photo=data_path.open('rb')
+    )
 
 def monitor_armies(upd, ctx):
     if len(ctx.args) < 1:

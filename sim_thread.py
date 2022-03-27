@@ -14,11 +14,13 @@ def start_sim_thread(step_fun, game, ticks_in_sec, update_secs, name=None):
         while True:
             # TODO: Add logging levels
             time.sleep(update_secs)
-            eprint(f'sim thread: {name}: STEP')
 
             nonlocal game
             game['lock'].acquire()
+
+            eprint(f'sim thread: {name}: STEP')
             game = step_fun(game, update_secs * ticks_in_sec)
+
             game['lock'].release()
 
     handle = threading.Thread(
