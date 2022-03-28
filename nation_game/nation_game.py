@@ -110,6 +110,9 @@ def start_round(upd, ctx):
 
     return RECV_ANS
 
+def cancel_round(upd, ctx):
+    return ConversationHandler.END
+
 def receive_ans(upd, ctx):
     user = upd.message.from_user
 
@@ -147,7 +150,19 @@ def receive_ans(upd, ctx):
         upd.message.reply_text(f'{user.name}, you are wrong D:')
         return RECV_ANS
 
-def cancel_round(upd, ctx):
+def show_todo(upd, ctx):
+    todo_file = ctx.args[0] if len(ctx.args) > 0 else 'main'
+
+    if todo_file == 'list':
+        upd.message.reply_text(
+            list(map(lambda p: p.name, (Path(__file__).parent / 'todo').rglob('*')))
+        )
+        return ConversationHandler.END
+
+    upd.message.reply_text(
+        (Path(__file__).parent / f'todo/{todo_file}.md')
+        .open(encoding='utf8').read()
+    )
     return ConversationHandler.END
 
 def print_world_map(get_color, title='World Map', max_color_range=25000):
@@ -468,7 +483,8 @@ def show_help(upd, ctx):
         '/nati NATION_CODE: Get info on nation\n'
         '/mon NATION_CODE TIME: Get sent private nation updates every TIME seconds\n'
         '/mon STOP: Stop private updates\n'
-        '/save: Save world map and player data'
+        '/save: Save world map and player data\n'
+        '/todo: Show todo list of game changes\n'
     )
 
 def lock_db(fun, *args):
@@ -490,6 +506,7 @@ round_handler = ConversationHandler(
         CommandHandler('att', partial(lock_db, begin_offensive)),
         CommandHandler('nati', show_nation_info),
         CommandHandler('mon', monitor_armies),
+        CommandHandler('todo', show_todo),
 
         # Administrator commands for testing
         CommandHandler('adep', partial(lock_db, deploy_army(admin=True))),
@@ -504,5 +521,5 @@ round_handler = ConversationHandler(
         # BIO: [MessageHandler(Filters.text & ~Filters.command, bio)],
     },
     fallbacks=[CommandHandler('cancel', cancel_round)],
-    per_user=False
+    per_user=False,
 )
