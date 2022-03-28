@@ -142,4 +142,4 @@ cython_debug/
 
 # BEGIN CUSTOM
 # World data not saved on github
-nation_game/assets/game-data/
+nation_game/assets/cache
