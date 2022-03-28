@@ -16,6 +16,12 @@ def step(game, time_delta):
             nation['Armies']
         ))
 
+        for army in nation['Armies']:
+            army['Fighting'] = set(filter(
+                lambda opp: opp in set(map(lambda x: x['Owner'], nation['Armies'])),
+                army['Fighting']
+            ))
+
     # Simulate war damage
     for nation in world:
         for army in nation['Armies']:
