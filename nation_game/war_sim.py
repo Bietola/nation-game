@@ -76,7 +76,7 @@ def step(game, time_delta):
 # import json
 
 # world = json.loads(
-#     (Path(__file__).parent / 'assets/test/2-vs-1.json').open().read()
+#     (Path(__file__).parent / 'assets/test/2-vs-1.json').open(encoding='utf8').read()
 # )
 
 # print('before')

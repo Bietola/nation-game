@@ -45,8 +45,8 @@
         "Price": 0.5026084219,
         "Armies": [
             {
-                "Owner": "Natives",
-                "Strength": 0.5026084219,
+                "Owner": "Chicco420",
+                "Strength": 4.710648148148149,
                 "Fighting": []
             }
         ]
@@ -227,8 +227,8 @@
         "Price": 3.4503125609,
         "Armies": [
             {
-                "Owner": "Natives",
-                "Strength": 3.4503125609,
+                "Owner": "NiggaCrash",
+                "Strength": 7.189814814814817,
                 "Fighting": []
             }
         ]
@@ -760,8 +760,8 @@
         "Price": 14.7466157974,
         "Armies": [
             {
-                "Owner": "Natives",
-                "Strength": 14.7466157974,
+                "Owner": "Lanky_Kong",
+                "Strength": 47.68518518518505,
                 "Fighting": []
             }
         ]
@@ -1150,8 +1150,8 @@
         "Price": 1.5441407948,
         "Armies": [
             {
-                "Owner": "Natives",
-                "Strength": 1.5441407948,
+                "Owner": "Lanky_Kong",
+                "Strength": 49.942129629629626,
                 "Fighting": []
             }
         ]
@@ -1280,8 +1280,8 @@
         "Price": 54.2827964082,
         "Armies": [
             {
-                "Owner": "Natives",
-                "Strength": 54.2827964082,
+                "Owner": "Chicco420",
+                "Strength": 43.726851851850874,
                 "Fighting": []
             }
         ]
@@ -1291,13 +1291,7 @@
         "Country Name": "Liechtenstein",
         "Population": 16493,
         "Price": 0.6181135413,
-        "Armies": [
-            {
-                "Owner": "Natives",
-                "Strength": 0.6181135413,
-                "Fighting": []
-            }
-        ]
+        "Armies": []
     },
     {
         "Country Code": "LTU",
@@ -1371,8 +1365,8 @@
         "Price": 3.3678249659,
         "Armies": [
             {
-                "Owner": "Natives",
-                "Strength": 3.3678249659,
+                "Owner": "Lanky_Kong",
+                "Strength": 49.82638888888888,
                 "Fighting": []
             }
         ]
@@ -1436,8 +1430,8 @@
         "Price": 24.7107125189,
         "Armies": [
             {
-                "Owner": "Natives",
-                "Strength": 24.7107125189,
+                "Owner": "Lanky_Kong",
+                "Strength": 43.344907407407014,
                 "Fighting": []
             }
         ]
@@ -1488,8 +1482,8 @@
         "Price": 0.8414409282,
         "Armies": [
             {
-                "Owner": "Natives",
-                "Strength": 0.8414409282,
+                "Owner": "NiggaCrash",
+                "Strength": 2.768518518518519,
                 "Fighting": []
             }
         ]
@@ -1501,8 +1495,18 @@
         "Price": 35.8097725876,
         "Armies": [
             {
-                "Owner": "Natives",
-                "Strength": 35.8097725876,
+                "Owner": "Bredo_21",
+                "Strength": 65.92052469135801,
+                "Fighting": []
+            },
+            {
+                "Owner": "NiggaCrash",
+                "Strength": 0.5339506172839483,
+                "Fighting": []
+            },
+            {
+                "Owner": "Lanky_Kong",
+                "Strength": 7.054783950617272,
                 "Fighting": []
             }
         ]
@@ -1579,8 +1583,8 @@
         "Price": 0.1639633022,
         "Armies": [
             {
-                "Owner": "NiggaCrash",
-                "Strength": 9.074074074074076,
+                "Owner": "Lanky_Kong",
+                "Strength": 50,
                 "Fighting": []
             }
         ]
@@ -1736,7 +1740,7 @@
         "Armies": [
             {
                 "Owner": "NiggaCrash",
-                "Strength": 60.79299336831755,
+                "Strength": 18.792993368317553,
                 "Fighting": []
             }
         ]
@@ -1878,8 +1882,8 @@
         "Price": 4.0711244697,
         "Armies": [
             {
-                "Owner": "Natives",
-                "Strength": 4.0711244697,
+                "Owner": "Lanky_Kong",
+                "Strength": 45.756876309373204,
                 "Fighting": []
             }
         ]
@@ -1956,8 +1960,8 @@
         "Price": 1.5628045033,
         "Armies": [
             {
-                "Owner": "Natives",
-                "Strength": 1.5628045033,
+                "Owner": "NiggaCrash",
+                "Strength": 3.5949074074074083,
                 "Fighting": []
             }
         ]
@@ -1982,8 +1986,8 @@
         "Price": 61.7026698847,
         "Armies": [
             {
-                "Owner": "Natives",
-                "Strength": 61.7026698847,
+                "Owner": "NiggaCrash",
+                "Strength": 32.73148148148001,
                 "Fighting": []
             }
         ]
@@ -2268,8 +2272,8 @@
         "Price": 2.3077413165,
         "Armies": [
             {
-                "Owner": "Natives",
-                "Strength": 2.3077413165,
+                "Owner": "Lanky_Kong",
+                "Strength": 47.45370370370355,
                 "Fighting": []
             }
         ]
@@ -2333,8 +2337,8 @@
         "Price": 0.1994918075,
         "Armies": [
             {
-                "Owner": "Natives",
-                "Strength": 0.1994918075,
+                "Owner": "Lanky_Kong",
+                "Strength": 49.88425925925925,
                 "Fighting": []
             }
         ]
@@ -2360,14 +2364,14 @@
         "Armies": [
             {
                 "Owner": "Natives",
-                "Strength": 1242.5680987339515,
+                "Strength": 1109.540491930049,
                 "Fighting": [
                     "Bredo_21"
                 ]
             },
             {
                 "Owner": "Bredo_21",
-                "Strength": 1652.317074834847,
+                "Strength": 1554.747630390289,
                 "Fighting": [
                     "Natives"
                 ]
