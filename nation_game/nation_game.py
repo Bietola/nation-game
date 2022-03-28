@@ -150,6 +150,29 @@ def receive_ans(upd, ctx):
         upd.message.reply_text(f'{user.name}, you are wrong D:')
         return RECV_ANS
 
+def list_occupied_nations(upd, ctx):
+    if len(ctx.args) > 1:
+        upd.message.reply_text(
+            'Usage: `/lsoc <PLAYER>'
+        )
+        return
+
+    owner = ctx.args[0] if len(ctx.args) > 0 else upd.message.from_user.username
+
+    def perc(nation, army):
+        return round(100 * army['Strength'] / sum(lens.Each()['Strength'].collect()(nation['Armies'])), 2)
+
+    reply = []
+    for nation in db('world'):
+        for army in nation['Armies']:
+            if army['Owner'] == owner:
+                reply.append(f'{nation["Country Name"]}: {round(army["Strength"], 2)} ({perc(nation, army)})')
+
+    if len(reply) == 0:
+        upd.message.reply_text('No armies?')
+    else:
+        upd.message.reply_text('\n'.join(reply))
+
 def show_todo(upd, ctx):
     todo_file = ctx.args[0] if len(ctx.args) > 0 else 'main'
 
@@ -506,6 +529,7 @@ round_handler = ConversationHandler(
         CommandHandler('att', partial(lock_db, begin_offensive)),
         CommandHandler('nati', show_nation_info),
         CommandHandler('mon', monitor_armies),
+        CommandHandler('lsoc', list_occupied_nations),
         CommandHandler('todo', show_todo),
 
         # Administrator commands for testing
