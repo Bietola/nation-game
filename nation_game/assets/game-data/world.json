@@ -1568,9 +1568,7 @@
             {
                 "Owner": "NiggaCrash",
                 "Strength": 17.97269818002049,
-                "Fighting": [
-                    "Natives"
-                ]
+                "Fighting": []
             }
         ]
     },
@@ -1583,9 +1581,7 @@
             {
                 "Owner": "NiggaCrash",
                 "Strength": 9.074074074074076,
-                "Fighting": [
-                    "Natives"
-                ]
+                "Fighting": []
             }
         ]
     },
@@ -1741,9 +1737,7 @@
             {
                 "Owner": "NiggaCrash",
                 "Strength": 60.79299336831755,
-                "Fighting": [
-                    "Natives"
-                ]
+                "Fighting": []
             }
         ]
     },
@@ -2366,17 +2360,16 @@
         "Armies": [
             {
                 "Owner": "Natives",
-                "Strength": 1244.7987786956528,
+                "Strength": 1242.5680987339515,
                 "Fighting": [
                     "Bredo_21"
                 ]
             },
             {
                 "Owner": "Bredo_21",
-                "Strength": 1653.9953155755898,
+                "Strength": 1652.317074834847,
                 "Fighting": [
-                    "Natives",
-                    "Dincio"
+                    "Natives"
                 ]
             }
         ]

@@ -383,6 +383,27 @@ def begin_offensive(upd, ctx):
     else:
         upd.message.reply_text('Offensive plan executed')
 
+def show_nation_info_raw(upd, ctx):
+    if len(ctx.args) != 1:
+        upd.message.reply_text(
+            'Usage: raw (NATION_CODE or NATION_NAME)'
+        )
+        return
+
+    nation_code = ctx.args[0]
+
+    world = db('world')
+
+    res = find_nation(world, nation_code)
+    if isinstance(res, Err):
+        upd.message.reply_text(res.value)
+    nation = res.value
+
+    upd.message.reply_text(json.dumps(
+        lens.Recur(Number).modify(lambda x: round(x, 3))(nation),
+        indent=4
+    ))
+
 def show_nation_info(upd, ctx):
     if len(ctx.args) != 1:
         upd.message.reply_text(
@@ -504,10 +525,14 @@ def show_help(upd, ctx):
         '/dep NATION_CODE SOLDIERS_AMOUNT [ENEMIES]: Deploy soldiers\n'
         '/att NATION_CODE [ENEMIES]: Start offernsive\n'
         '/nati NATION_CODE: Get info on nation\n'
+        '/raw NATION_CODE: Get raw json info on nation\n'
         '/mon NATION_CODE TIME: Get sent private nation updates every TIME seconds\n'
         '/mon STOP: Stop private updates\n'
+        '/lsoc <PLAYER>: Show all armies of PLAYER (or yours)\n'
         '/save: Save world map and player data\n'
         '/todo: Show todo list of game changes\n'
+        '/todo list: List todo files\n'
+        '/todo FILE_NAME: Show todo list named FILE_NAME\n'
     )
 
 def lock_db(fun, *args):
@@ -528,6 +553,7 @@ round_handler = ConversationHandler(
         CommandHandler('dep', partial(lock_db, deploy_army())),
         CommandHandler('att', partial(lock_db, begin_offensive)),
         CommandHandler('nati', show_nation_info),
+        CommandHandler('raw', show_nation_info_raw),
         CommandHandler('mon', monitor_armies),
         CommandHandler('lsoc', list_occupied_nations),
         CommandHandler('todo', show_todo),
