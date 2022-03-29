@@ -12,6 +12,7 @@ import pandas as pd
 import plotly.express as px
 from pathlib import Path
 from result import Result, Ok, Err
+import datetime
 import time
 import atomics
 import threading
@@ -35,12 +36,22 @@ RECV_ANS = range(1)
 
 g_db = {
     'players': defaultdict(
-        lambda: {'active': False, 'energy': [], 'tot_points': 0, 'points': 0},
+        lambda: {
+            'active': False,
+            'solo_energy': 100,
+            'battle_energy': 100,
+            'tot_points': 0,
+            'points': 0
+        },
         json.loads(Path('./assets/game-data/players.json').open(encoding='utf8').read())
     ),
     'world': json.loads(Path('./assets/game-data/world.json').open(encoding='utf8').read()),
     'lock': Lock(),
-    'sim-speed': 20
+    'sim-speed': 20,
+    'energy-recharge': {
+        'solo': 100,   # energy/day
+        'battle': 100, # energy/day
+    }
 }
 
 def db_set(field, lens1, lock=False):
@@ -127,6 +138,10 @@ def receive_ans(upd, ctx):
     user = upd.message.from_user
 
     db_set('players', lens[user.username]['active'].set(True), lock=True)
+
+    if db('players')[user.username]['battle_energy'] <= 0:
+        upd.message.reply_text(f'Battle energy over (wait for next recharge)')
+        return RECV_ANS
 
     if upd.message.text.lower() == 'ranking':
         upd.message.reply_text(json.dumps(db('players'), indent=4))

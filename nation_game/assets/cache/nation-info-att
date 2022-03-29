@@ -1,4 +1,6 @@
 // Offensive plans
 digraph {
-	Natives
+	Lanky_Kong
+	NiggaCrash
+	NiggaCrash -> Lanky_Kong
 }

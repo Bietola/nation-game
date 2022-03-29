@@ -1424,16 +1424,9 @@
         "Price": 24.7107125189,
         "Armies": [
             {
-                "Owner": "Lanky_Kong",
-                "Strength": 36.345173263015745,
-                "Fighting": []
-            },
-            {
                 "Owner": "NiggaCrash",
-                "Strength": 46.61496913580218,
-                "Fighting": [
-                    "Lanky_Kong"
-                ]
+                "Strength": 62.61496913580218,
+                "Fighting": []
             }
         ]
     },
@@ -2355,14 +2348,14 @@
         "Armies": [
             {
                 "Owner": "Natives",
-                "Strength": 625.5834693115734,
+                "Strength": 476.43810620670905,
                 "Fighting": [
                     "Bredo_21"
                 ]
             },
             {
                 "Owner": "Bredo_21",
-                "Strength": 899.8286489084904,
+                "Strength": 803.3008711306951,
                 "Fighting": [
                     "Natives"
                 ]
