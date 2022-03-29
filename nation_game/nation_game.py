@@ -43,7 +43,7 @@ g_db = {
     'sim-speed': 20
 }
 
-def db_set(field, lens1, lock=True):
+def db_set(field, lens1, lock=False):
     global g_db
     if lock: db('lock').acquire()
     g_db[field] = lens1(g_db[field])
@@ -111,7 +111,7 @@ def start_round(upd, ctx):
     send_txt(f'Let the game commence [t-{time_left}]')
 
     round_starter = upd.message.from_user.username 
-    db_set('players', lens[round_starter]['active'].set(True))
+    db_set('players', lens[round_starter]['active'].set(True), lock=True)
 
     global g_chosen_flag
     g_chosen_flag = random.choice(
@@ -126,7 +126,7 @@ def cancel_round(upd, ctx):
 def receive_ans(upd, ctx):
     user = upd.message.from_user
 
-    db_set('players', lens[user.username]['active'].set(True))
+    db_set('players', lens[user.username]['active'].set(True), lock=True)
 
     if upd.message.text.lower() == 'ranking':
         upd.message.reply_text(json.dumps(db('players'), indent=4))
@@ -143,10 +143,8 @@ def receive_ans(upd, ctx):
 
     elif upd.message.text.lower() == extract_flag_name(g_chosen_flag['name']).lower():
         db('lock').acquire()
+
         pls = db('players')
-        winner_data = db('players')[user.username]
-        tot_points = winner_data['tot_points']
-        points = winner_data['points']
         
         prize = sum(
             bind(pls).Values()['active']
@@ -154,15 +152,16 @@ def receive_ans(upd, ctx):
                 .collect()
         )
 
-        db_set('players', lens.Values()['active'].set(False), lock=False)
-
-        upd.message.reply_text(
-            f'{user.name} is the winner (+{prize}) [{points + prize}/{tot_points + prize}]'
-        )
+        db_set('players', lens.Values()['active'].set(False))
 
         # Record win
-        winner_data['points'] += prize
-        winner_data['tot_points'] += prize
+        winner = db('players')[user.username]
+        winner['points'] += prize
+        winner['tot_points'] += prize
+
+        upd.message.reply_text(
+            f'{user.name} is the winner (+{prize}) [{winner["points"]}/{winner["tot_points"]}]'
+        )
 
         db('lock').release()
 
