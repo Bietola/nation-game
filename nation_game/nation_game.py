@@ -4,7 +4,7 @@ from numbers import Number
 import graphviz
 import random
 import re
-from lenses import lens
+from lenses import lens, bind
 from pathlib import Path
 from collections import defaultdict
 import json
@@ -34,13 +34,20 @@ g_ng_phase_start_t = time.time()
 RECV_ANS = range(1)
 
 g_db = {
-    'lock': Lock(),
     'players': defaultdict(
-        lambda: {'tot_points': 0, 'points': 0},
+        lambda: {'active': False, 'energy': [], 'tot_points': 0, 'points': 0},
         json.loads(Path('./assets/game-data/players.json').open(encoding='utf8').read())
     ),
-    'world': json.loads(Path('./assets/game-data/world.json').open(encoding='utf8').read())
+    'world': json.loads(Path('./assets/game-data/world.json').open(encoding='utf8').read()),
+    'lock': Lock(),
+    'sim-speed': 20
 }
+
+def db_set(field, lens1, lock=True):
+    global g_db
+    if lock: db('lock').acquire()
+    g_db[field] = lens1(g_db[field])
+    if lock: db('lock').release()
 
 def db(field):
     global g_db
@@ -83,7 +90,7 @@ def start_round(upd, ctx):
         )
 
     if upd.effective_chat.id not in NG_ENABLED_GROUPS:
-        send_txt(f'smh [ng not allowed in group id {-1001641644487}]')
+        send_txt(f'smh [ng not allowed in group id {upd.effective_chat.id}]')
         return ConversationHandler.END
 
     global g_ng_phase_start_t
@@ -103,6 +110,9 @@ def start_round(upd, ctx):
 
     send_txt(f'Let the game commence [t-{time_left}]')
 
+    round_starter = upd.message.from_user.username 
+    db_set('players', lens[round_starter]['active'].set(True))
+
     global g_chosen_flag
     g_chosen_flag = random.choice(
         list(filter(lambda e: 'flag' in e['name'], emjutl.db())))
@@ -116,6 +126,8 @@ def cancel_round(upd, ctx):
 def receive_ans(upd, ctx):
     user = upd.message.from_user
 
+    db_set('players', lens[user.username]['active'].set(True))
+
     if upd.message.text.lower() == 'ranking':
         upd.message.reply_text(json.dumps(db('players'), indent=4))
         return RECV_ANS
@@ -126,21 +138,31 @@ def receive_ans(upd, ctx):
 
     elif upd.message.text.lower() == 'cancel':
         upd.message.reply_text(f'No more (answer: {g_chosen_flag["name"]})')
+        db_set('players', lens.Values()['active'].set(False))
         return ConversationHandler.END
 
     elif upd.message.text.lower() == extract_flag_name(g_chosen_flag['name']).lower():
         db('lock').acquire()
+        pls = db('players')
         winner_data = db('players')[user.username]
         tot_points = winner_data['tot_points']
         points = winner_data['points']
+        
+        prize = sum(
+            bind(pls).Values()['active']
+                .F(int)
+                .collect()
+        )
+
+        db_set('players', lens.Values()['active'].set(False), lock=False)
 
         upd.message.reply_text(
-            f'{user.name} is the winner [{points + 1}/{tot_points + 1}]'
+            f'{user.name} is the winner (+{prize}) [{points + prize}/{tot_points + prize}]'
         )
 
         # Record win
-        winner_data['points'] += 1
-        winner_data['tot_points'] += 1
+        winner_data['points'] += prize
+        winner_data['tot_points'] += prize
 
         db('lock').release()
 
@@ -172,6 +194,12 @@ def list_occupied_nations(upd, ctx):
         upd.message.reply_text('No armies?')
     else:
         upd.message.reply_text('\n'.join(reply))
+
+def show_speed(upd, ctx):
+    upd.message.reply_text(
+        f'{db("sim-speed")}x'
+    )
+    return ConversationHandler.END
 
 def show_todo(upd, ctx):
     todo_file = ctx.args[0] if len(ctx.args) > 0 else 'main'
@@ -255,7 +283,7 @@ def find_nation(world, nation_code):
         return Ok(nation)
 
     nation = filter(
-        lambda nat: nat['Country Name'].lower() == nation_code.lower(),
+        lambda nat: nat['Country Name'].lower() == nation_code.replace('_', ' ').lower(),
         world
     )
     nation = next(nation, None)
@@ -533,6 +561,7 @@ def show_help(upd, ctx):
         '/todo: Show todo list of game changes\n'
         '/todo list: List todo files\n'
         '/todo FILE_NAME: Show todo list named FILE_NAME\n'
+        '/speed: Show simulation speed\n'
     )
 
 def lock_db(fun, *args):
@@ -557,6 +586,7 @@ round_handler = ConversationHandler(
         CommandHandler('mon', monitor_armies),
         CommandHandler('lsoc', list_occupied_nations),
         CommandHandler('todo', show_todo),
+        CommandHandler('speed', show_speed),
 
         # Administrator commands for testing
         CommandHandler('adep', partial(lock_db, deploy_army(admin=True))),

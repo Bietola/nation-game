@@ -1,22 +1,32 @@
 {
     "Dincio": {
-        "tot_points": 102,
-        "points": 62.85005158250442
+        "active": false,
+        "energy": [],
+        "tot_points": 104,
+        "points": 64.85005158250442
     },
     "Bredo_21": {
-        "tot_points": 1115,
-        "points": 6
+        "active": false,
+        "energy": [],
+        "tot_points": 1128,
+        "points": 0.0
     },
     "Lanky_Kong": {
+        "active": false,
+        "energy": 100,
         "tot_points": 588,
         "points": 187.05478395061726
     },
     "Chicco420": {
+        "active": false,
+        "energy": [],
         "tot_points": 158,
         "points": 83
     },
     "NiggaCrash": {
+        "active": false,
+        "energy": [],
         "tot_points": 237,
-        "points": 17.53395061728395
+        "points": 46.61496913580218
     }
 }

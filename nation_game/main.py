@@ -98,14 +98,16 @@ def nation_game_bot(max_spam_lv=1):
     # Start Things Up #
     ###################
 
+    game = nation_game.g_db
+
     # Start world simulation
     # TODO: Make sim thread terminations graceful useing the handle
     import war_sim
     _war_sim_h = sim_thread.start_sim_thread(
         name='War',
         step_fun=war_sim.step,
-        game=nation_game.g_db, # TODO: This is shit
-        ticks_in_sec=10 * (50 / 24 / 3600), # 50 ticks = 1 day; 10x speedup
+        game=game, # TODO: This is shit
+        ticks_in_sec=game['sim-speed'] * (50 / 24 / 3600), # 50 ticks = 1 day; sim-speed-x speedup
         # update_secs=100,
         update_secs=10 # for DB
     )
