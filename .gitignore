@@ -141,8 +141,5 @@ dmypy.json
 cython_debug/
 
 # BEGIN CUSTOM
-# World data not saved on github
-nation_game/assets/game-data
-
 # Game cache
 nation_game/assets/cache

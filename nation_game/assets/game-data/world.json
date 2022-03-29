@@ -611,18 +611,9 @@
         "Price": 3.1344536555,
         "Armies": [
             {
-                "Owner": "Natives",
-                "Strength": 1.6145199904435867,
-                "Fighting": [
-                    "NiggaCrash"
-                ]
-            },
-            {
                 "Owner": "NiggaCrash",
-                "Strength": 5.189814814814817,
-                "Fighting": [
-                    "Natives"
-                ]
+                "Strength": 4.726851851851855,
+                "Fighting": []
             }
         ]
     },
@@ -2201,14 +2192,14 @@
         "Armies": [
             {
                 "Owner": "Natives",
-                "Strength": 22.77179141868109,
+                "Strength": 7.608285993438009,
                 "Fighting": [
                     "Bredo_21"
                 ]
             },
             {
                 "Owner": "Bredo_21",
-                "Strength": 361.3981481481467,
+                "Strength": 360.7037037037021,
                 "Fighting": [
                     "Natives"
                 ]
@@ -2366,14 +2357,14 @@
         "Armies": [
             {
                 "Owner": "Natives",
-                "Strength": 644.0862126093032,
+                "Strength": 643.1018638324919,
                 "Fighting": [
                     "Bredo_21"
                 ]
             },
             {
                 "Owner": "Bredo_21",
-                "Strength": 912.7916118714558,
+                "Strength": 912.0971674270112,
                 "Fighting": [
                     "Natives"
                 ]
