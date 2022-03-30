@@ -19,12 +19,17 @@ import threading
 from threading import Lock
 from functools import partial
 
+import utils
 import emoji_utils as emjutl
 
 # Constants
 NG_PHASE_DELTA = 60 * 5
 WAR_PHASE_DELTA = 60 * 1
 NG_ENABLED_GROUPS = [-1001641644487] # TODO: Make this configurable
+
+# To be enums
+UNIT_TYPES = ['military', 'factories']
+SPECIAL_UNIT_TYPES = ['factories']
 
 # Globals
 g_chosen_flag = {}
@@ -326,30 +331,58 @@ def find_army(world, nation, owner):
 
     return Ok(army)
 
-def deploy_army(admin=False):
+def deploy_units(admin=False, unit_type='Military'):
     def handler(upd, ctx):
         if len(ctx.args) < 2:
             upd.message.reply_text(
-                'Usage: `/dep NATION_CODE AMOUNT [+/-OPPONENTS]`'
+                'Usage: `/dep NATION_CODE AMOUNT TYPE? (+/-)OPPONENTS*'
             )
             return
 
         nation_code = ctx.args[0]
         amount = int(ctx.args[1])
-        off_opts = ctx.args[2:]
-        owner = upd.message.from_user.username
+        unit_type = ctx.args[2] if len(ctx.args) >= 3 else 'Military'
+        off_opts = ctx.args[3:]
+
+        deploy_from = upd.message.from_user.username
+
+        valid_unit_types = list(utils.all_prefix_matches(
+            unit_type.lower(),
+            UNIT_TYPES
+        ))
+        if len(valid_unit_types) == 0:
+            upd.message.reply_text(
+                'ERR: Malformed unit type.'
+            )
+            return ConversationHandler.END
+        elif len(valid_unit_types) > 1:
+            upd.message.reply_text(
+                'ERR: Ambiguous unit type.\n'
+                '\n'.join(valid_unit_types)
+            )
+            return ConversationHandler.END
+        else:
+            unit_type = valid_unit_types[0]
+
+        if unit_type == 'military':
+            deploy_to = upd.message.from_user.username
+        else:
+            # Factories
+            deploy_to = 'factories'
+
+        if deploy_to in SPECIAL_UNIT_TYPES: deploy_to = '_' + deploy_to
 
         world = db('world')
         players = db('players')
 
-        if not admin and amount > players[owner]['points']:
+        if not admin and amount > players[deploy_from]['points']:
             upd.message.reply_text(
-                f'Not enough points, deploying all ({players[owner]["points"]})'
+                f'Not enough points, deploying all ({players[deploy_from]["points"]})'
             )
-            amount = players[owner]['points']
+            amount = players[deploy_from]['points']
 
         # NB. This creates an empty army if there isn't one
-        army = find_army(world, nation_code, owner)
+        army = find_army(world, nation_code, deploy_to)
         if isinstance(army, Err):
             upd.message.reply_text(
                 army.value
@@ -365,9 +398,9 @@ def deploy_army(admin=False):
 
         army['Strength'] += amount
         if not admin or amount < 0:
-            players[owner]['points'] -= amount
+            players[deploy_from]['points'] -= amount
 
-        res = apply_offensive_opts(owner, nation_code, off_opts)
+        res = apply_offensive_opts(deploy_from, nation_code, off_opts)
         if isinstance(res, Err):
             upd.message.reply_text(res.value)
 
@@ -593,7 +626,7 @@ round_handler = ConversationHandler(
         CommandHandler('rank', show_ranking),
         CommandHandler('map', show_world_map),
         CommandHandler('save', partial(lock_db, save_game)),
-        CommandHandler('dep', partial(lock_db, deploy_army())),
+        CommandHandler('dep', partial(lock_db, deploy_units())),
         CommandHandler('att', partial(lock_db, begin_offensive)),
         CommandHandler('nati', show_nation_info),
         CommandHandler('raw', show_nation_info_raw),
@@ -603,7 +636,7 @@ round_handler = ConversationHandler(
         CommandHandler('speed', show_speed),
 
         # Administrator commands for testing
-        CommandHandler('adep', partial(lock_db, deploy_army(admin=True))),
+        CommandHandler('adep', partial(lock_db, deploy_units(admin=True))),
     ],
     states={
         RECV_ANS: [MessageHandler(Filters.text, receive_ans)],
