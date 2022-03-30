@@ -768,14 +768,14 @@
         "Armies": [
             {
                 "Owner": "Natives",
-                "Strength": 115.45045712917018,
+                "Strength": 104.08311696023043,
                 "Fighting": [
                     "Bredo_21"
                 ]
             },
             {
                 "Owner": "Bredo_21",
-                "Strength": 361.76851851851404,
+                "Strength": 358.2962962962912,
                 "Fighting": [
                     "Natives"
                 ]
