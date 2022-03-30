@@ -716,7 +716,7 @@
         "Armies": [
             {
                 "Owner": "Bredo_21",
-                "Strength": 69.58333333333292,
+                "Strength": 99.58333333333292,
                 "Fighting": []
             }
         ]
@@ -729,7 +729,7 @@
         "Armies": [
             {
                 "Owner": "Bredo_21",
-                "Strength": 39.0,
+                "Strength": 69.0,
                 "Fighting": []
             }
         ]
@@ -767,18 +767,9 @@
         "Price": 166.0108384427,
         "Armies": [
             {
-                "Owner": "Natives",
-                "Strength": 104.08311696023043,
-                "Fighting": [
-                    "Bredo_21"
-                ]
-            },
-            {
                 "Owner": "Bredo_21",
-                "Strength": 358.2962962962912,
-                "Fighting": [
-                    "Natives"
-                ]
+                "Strength": 342.5555555555476,
+                "Fighting": []
             }
         ]
     },
@@ -2233,8 +2224,8 @@
         "Price": 17.7841905647,
         "Armies": [
             {
-                "Owner": "Natives",
-                "Strength": 17.7841905647,
+                "Owner": "NiggaCrash",
+                "Strength": 35.7175925925926,
                 "Fighting": []
             }
         ]
@@ -2363,8 +2354,8 @@
         "Price": 3.4635795344,
         "Armies": [
             {
-                "Owner": "Natives",
-                "Strength": 3.4635795344,
+                "Owner": "NiggaCrash",
+                "Strength": 6.788255189506941,
                 "Fighting": []
             }
         ]
@@ -2428,8 +2419,8 @@
         "Price": 2.3868934295,
         "Armies": [
             {
-                "Owner": "Natives",
-                "Strength": 2.3868934295,
+                "Owner": "Lanky_Kong",
+                "Strength": 35.701081492664166,
                 "Fighting": []
             }
         ]

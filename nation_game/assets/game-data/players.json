@@ -8,14 +8,14 @@
     "Bredo_21": {
         "active": false,
         "energy": [],
-        "tot_points": 1365,
-        "points": 21.0
+        "tot_points": 1428,
+        "points": 24.0
     },
     "Lanky_Kong": {
         "active": false,
         "energy": 100,
-        "tot_points": 706,
-        "points": 133.17129629629594
+        "tot_points": 856,
+        "points": 237.17129629629594
     },
     "Chicco420": {
         "active": false,
@@ -26,7 +26,7 @@
     "NiggaCrash": {
         "active": false,
         "energy": [],
-        "tot_points": 367,
-        "points": 54.714181115432865
+        "tot_points": 432,
+        "points": 62.7335547311409
     }
 }
