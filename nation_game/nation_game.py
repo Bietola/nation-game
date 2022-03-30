@@ -6,8 +6,8 @@ import graphviz
 import random
 import math
 import re
+from file_read_backwards import FileReadBackwards
 from lenses import lens, bind
-from pathlib import Path
 from collections import defaultdict
 import json
 import pandas as pd
@@ -19,6 +19,7 @@ import time
 import atomics
 import threading
 from threading import Lock
+from itertools import islice
 from functools import partial
 
 import utils
@@ -42,6 +43,22 @@ g_ng_phase_start_t = time.time()
 # Game states
 RECV_ANS = range(1)
 
+def _log(contents):
+    log_file = (Path(__file__).parent / 'log.txt')
+    log_path = log_file.resolve()
+
+    with FileReadBackwards(log_path, encoding='utf-8') as logf:
+        last_line = logf.readline()
+
+    if m := re.compile(r'^(\d+?):').match(last_line):
+        line_n = (int(m.group(1)) + 1) % 100
+    else:
+        line_n = 0
+
+    contents = f'{line_n}: {contents}'
+    print(contents)
+    print(contents, file=log_file.open('a'))
+
 g_db = {
     'players': defaultdict(
         lambda: {
@@ -61,7 +78,9 @@ g_db = {
     'energy-recharge': {
         'solo': 100,   # energy/day
         'battle': 100, # energy/day
-    }
+    },
+
+    'log': _log,
 
     # # TODO: Put in seperate file (including default values)
     # 'unit-types': defaultdict(
@@ -204,7 +223,7 @@ def receive_ans(upd, ctx):
         winner['tot_points'] += prize
 
         upd.message.reply_text(
-            f'{user.name} is the winner (+{prize}) [{winner["points"]}/{winner["tot_points"]}]'
+            f'{user.name} is the winner (+{prize}) [{round(winner["points"], 4)}/{winner["tot_points"]}]'
         )
 
         db('lock').release()
@@ -215,12 +234,34 @@ def receive_ans(upd, ctx):
         upd.message.reply_text(f'{user.name}, you are wrong D:')
         return RECV_ANS
 
+def dump_log(upd, ctx, ret=True):
+    pattern = ctx.args[0] if len(ctx.args) >= 1 else '.*'
+    lines_back = int(ctx.args[1]) if len(ctx.args) >= 2 else 5
+
+    pattern = re.compile(pattern)
+    with FileReadBackwards(
+        (Path(__file__).parent / 'log.txt'),
+        encoding='utf-8'
+    ) as logf:
+        lines = list(islice(filter(
+            lambda l: pattern.search(l),
+            logf
+        ), lines_back))
+        lines.reverse()
+
+        upd.message.reply_text(
+            '\n'.join(lines) if len(lines) != 0 else 'No messages?'
+        )
+
+    if ret:
+        return ConversationHandler.END
+
 def list_occupied_nations(upd, ctx):
     if len(ctx.args) > 1:
         upd.message.reply_text(
             'Usage: `/lsoc <PLAYER>'
         )
-        return
+        return ConversationHandler.END
 
     owner = ctx.args[0] if len(ctx.args) > 0 else upd.message.from_user.username
 
@@ -231,7 +272,9 @@ def list_occupied_nations(upd, ctx):
     for nation in db('world'):
         for army in nation['Armies']:
             if army['Owner'] == owner:
-                reply.append(f'{nation["Country Name"]}: {round(army["Strength"], 2)} ({perc(nation, army)})')
+                reply.append(
+                    f'{nation["Country Name"]}: {round(army["Strength"], 2)} ({perc(nation, army)})'
+                )
 
     if len(reply) == 0:
         upd.message.reply_text('No armies?')
@@ -560,18 +603,24 @@ def gift_points(upd, ctx):
 def monitor_armies(upd, ctx):
     if len(ctx.args) < 1:
         upd.message.reply_text(
-            'Usage: mon <STOP|NATION_CODE> [UPDATE_SECS=30]'
+            'Usage: mon (-t UPDATE_SECS=10) (log LOG_ARGS*)|stop|NATION_CODE'
         )
         return
 
+    if ctx.args[0] == '-t':
+        update_secs = ctx.args[1]
+        ctx.args = ctx.args[2:]
+    else:
+        update_secs = 10
+
     nation_code = ctx.args[0]
-    update_secs = int(ctx.args[1]) if len(ctx.args) > 1 else 30
+    log_args = ctx.args[1:] if len(ctx.args) >= 1 else None
 
     owner = upd.message.from_user
     username = owner.username
     threads = monitor_armies.threads
 
-    if nation_code == 'STOP':
+    if nation_code == 'stop':
         upd.message.reply_text('Stopping monitor...')
         threads[username][1].store(1)
         threads[username][0].join()
@@ -580,10 +629,12 @@ def monitor_armies(upd, ctx):
 
     world = db('world')
 
-    res = find_nation(world, nation_code)
-    if isinstance(res, Err):
-        upd.message.reply_text(res.value)
-    nation = res.value
+    if nation_code != 'log':
+        res = find_nation(world, nation_code)
+        if isinstance(res, Err):
+            upd.message.reply_text(res.value)
+            return ConversationHandler.END
+        nation = res.value
 
     def monitor():
         while True:
@@ -599,13 +650,17 @@ def monitor_armies(upd, ctx):
                 )
                 break
 
-            ctx.bot.send_message(
-                chat_id=owner.id,
-                text=json.dumps(
-                    nation,
-                    indent=4
+            if nation_code == 'log':
+                ctx.args = log_args
+                dump_log(upd, ctx, ret=False)
+            else:
+                ctx.bot.send_message(
+                    chat_id=owner.id,
+                    text=json.dumps(
+                        nation,
+                        indent=4
+                    )
                 )
-            )
 
     thread = threading.Thread(target=monitor)
     stop_flag = atomics.atomic(width=4, atype=atomics.INT)
@@ -615,6 +670,8 @@ def monitor_armies(upd, ctx):
         f'Monitoring {nation_code}'
     )
     thread.start()
+
+    return ConversationHandler.END
 
 monitor_armies.threads = {}
 
@@ -628,7 +685,7 @@ def show_help(upd, ctx):
         '/nati NATION_CODE: Get info on nation\n'
         '/raw NATION_CODE: Get raw json info on nation\n'
         '/mon NATION_CODE TIME: Get sent private nation updates every TIME seconds\n'
-        '/mon STOP: Stop private updates\n'
+        '/mon stop: Stop private updates\n'
         '/lsoc <PLAYER>: Show all armies of PLAYER (or yours)\n'
         '/save: Save world map and player data\n'
         '/todo: Show todo list of game changes\n'
@@ -660,10 +717,11 @@ round_handler = ConversationHandler(
         CommandHandler('lsoc', list_occupied_nations),
         CommandHandler('todo', show_todo),
         CommandHandler('speed', show_speed),
+        CommandHandler('dump', dump_log),
 
         # Administrator commands for testing
         CommandHandler('adep', partial(lock_db, deploy_units(admin=True))),
-        CommandHandler('agift', partial(lock_db, gift_points)),
+        CommandHandler('agift', partial(lock_db, gift_points))
     ],
     states={
         RECV_ANS: [MessageHandler(Filters.text, receive_ans)],

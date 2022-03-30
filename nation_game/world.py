@@ -51,4 +51,12 @@ def nation_occupation_perc(world, nation_code, deploy_from):
         return res
     army = res.value
 
-    return Ok(army['Strength'] / sum(map(lambda a: a['Strength'], nation['Armies'])))
+    tot_strength = sum(map(
+        lambda a: a['Strength'],
+        filter(
+            lambda a: a['Owner'] != '_factories',
+            nation['Armies']
+        )
+    ))
+
+    return Ok(army['Strength'] / tot_strength)

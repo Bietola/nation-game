@@ -47,7 +47,7 @@ def step(game, time_delta):
 
             for opp in opponents:
                 damage = (size_advantage / len(opponents)) * time_delta
-                print(f'DB: attack! {damage}')
+                game['log'](f'WAR: {army["Owner"]} hurts {opp["Owner"]} (-{damage})') # TODO
                 opp['Strength'] -= damage
 
     # Native armies AI: attack EVERYONE

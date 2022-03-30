@@ -16,6 +16,7 @@ result = "^0.7.0"
 atomics = "^1.0.2"
 emoji = "^1.7.0"
 kaleido = "0.2.1"
+file-read-backwards = "^2.0.0"
 
 [tool.poetry.dev-dependencies]
 

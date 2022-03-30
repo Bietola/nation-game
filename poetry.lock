@@ -85,6 +85,14 @@ python-versions = "*"
 dev = ["pytest", "coverage", "coveralls"]
 
 [[package]]
+name = "file-read-backwards"
+version = "2.0.0"
+description = "Memory efficient way of reading files line-by-line from the end of file"
+category = "main"
+optional = false
+python-versions = "*"
+
+[[package]]
 name = "fire"
 version = "0.4.0"
 description = "A library for automatically generating command line interfaces."
@@ -301,7 +309,7 @@ test = ["pytest-mock (>=3.3)", "pytest (>=4.3)"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "ed444bdf810381371a9465fc075733529cb8e2ddf0221a46a9c48064342a3574"
+content-hash = "7d8785f9f4ae291eda9e494ef431bb979c8353f72e7d2f2d158585c900e13495"
 
 [metadata.files]
 apscheduler = [
@@ -405,6 +413,10 @@ cffi = [
 ]
 emoji = [
     {file = "emoji-1.7.0.tar.gz", hash = "sha256:65c54533ea3c78f30d0729288998715f418d7467de89ec258a31c0ce8660a1d1"},
+]
+file-read-backwards = [
+    {file = "file_read_backwards-2.0.0-py2.py3-none-any.whl", hash = "sha256:78684aafc0471e9e0f62a8662361bfaf70ade3d38333d7f166fd8024a028b1d1"},
+    {file = "file_read_backwards-2.0.0.tar.gz", hash = "sha256:fd50d9089b412147ea3c6027e2ad905f977002db2918cf315d64eed23d6d6eb8"},
 ]
 fire = [
     {file = "fire-0.4.0.tar.gz", hash = "sha256:c5e2b8763699d1142393a46d0e3e790c5eb2f0706082df8f647878842c216a62"},
