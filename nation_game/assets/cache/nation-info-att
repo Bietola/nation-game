@@ -1,5 +1,6 @@
 // Offensive plans
 digraph {
-	"Bredo_21 (500)"
-	"_factories (1500)"
+	NiggaCrash [label="NiggaCrash (10)"]
+	_factories [label="_factories (10)"]
+	Dincio [label="Dincio (10)"]
 }

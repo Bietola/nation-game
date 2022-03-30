@@ -23,6 +23,7 @@ from functools import partial
 
 import utils
 import emoji_utils as emjutl
+from world import *
 
 # Constants
 NG_PHASE_DELTA = 60 * 5
@@ -52,13 +53,34 @@ g_db = {
         },
         json.loads(Path('./assets/game-data/players.json').open(encoding='utf8').read())
     ),
+    
     'world': json.loads(Path('./assets/game-data/world.json').open(encoding='utf8').read()),
+
     'lock': Lock(),
     'sim-speed': 20,
     'energy-recharge': {
         'solo': 100,   # energy/day
         'battle': 100, # energy/day
     }
+
+    # # TODO: Put in seperate file (including default values)
+    # 'unit-types': defaultdict(
+    #     lambda: {
+    #         # ...
+    #     },
+    #     [
+    #         'military': {
+    #             build_occ_req: 0.0,
+    #             can_attack: True
+    #         },
+    #         'factories': {
+    #             ind_bonus: ''
+    #             build_occ_req: 0.7,
+    #             can_attack: False
+    #         }
+    #     ]
+    # )
+
 }
 
 def db_set(field, lens1, lock=False):
@@ -293,46 +315,6 @@ def save_game(upd, ctx):
         text='World map saved'
     )
 
-def find_nation(world, nation_code):
-    nation = filter(
-        lambda nat: nat['Country Code'] == nation_code,
-        world
-    )
-    nation = next(nation, None)
-
-    if nation:
-        return Ok(nation)
-
-    nation = filter(
-        lambda nat: nat['Country Name'].lower() == nation_code.replace('_', ' ').lower(),
-        world
-    )
-    nation = next(nation, None)
-
-    if not nation:
-        return Err(f'{nation_code} is not a valid nation code')
-
-    return Ok(nation)
-
-def find_army(world, nation, owner):
-    nation = find_nation(world, nation)
-    if isinstance(nation, Err):
-        return nation
-    nation = nation.value
-    
-    armies = nation.get('Armies', [])
-
-    army = filter(
-        lambda army: army['Owner'] == owner,
-        armies
-    )
-    army = next(army, None)
-    if not army:
-        armies.append({'Owner': owner, 'Strength': 0, 'Fighting': []})
-        army = armies[-1]
-
-    return Ok(army)
-
 def deploy_units(admin=False, unit_type='Military'):
     def handler(upd, ctx):
         if len(ctx.args) < 2:
@@ -382,6 +364,36 @@ def deploy_units(admin=False, unit_type='Military'):
                 f'Not enough points, deploying all ({players[deploy_from]["points"]})'
             )
             amount = players[deploy_from]['points']
+
+        # NB. This creates an empty army if there isn't one
+        nation = find_nation(world, nation_code)
+        if isinstance(army, Err):
+            upd.message.reply_text(
+                nation.value
+            )
+            return
+        nation = nation.value
+
+        if deploy_to == '_factories':
+            factories = next(filter(
+                lambda a: a['Owner'] = '_factories',
+                nation['Armies']
+            ), {'Strength': 0})['Strength']
+            if amount + factories > nation['Price']:
+                upd.message.reply_text(
+                    f'Too many {deploy_to} units! Building max ({nation["Price"]}).'
+                )
+                amount = nation['Price']
+            if amount < 0:
+                upd.message.reply_text(
+                    f'ERR: Can\'t {deploy_to} units not removable.'
+                )
+                return ConversationHandler.END
+            if nation_occupation_perc(world, nation_code, deploy_from).value < 0.7:
+                upd.message.reply_text(
+                    f'ERR: Can\'t deploy {deploy_to} units, occupation needed.'
+                )
+                return ConversationHandler.END
 
         # NB. This creates an empty army if there isn't one
         army = find_army(world, nation_code, deploy_to)
@@ -524,7 +536,7 @@ def show_nation_info(upd, ctx):
     # Print attack relationships
     dot = graphviz.Digraph(comment='Offensive plans')
     for army in nation['Armies']:
-        dot.node(f'{army["Owner"]} ({math.floor(army["Strength"])})')
+        dot.node(army['Owner'], f'{army["Owner"]} ({math.floor(army["Strength"])})')
         for opp in army['Fighting']:
             dot.edge(army['Owner'], opp)
 

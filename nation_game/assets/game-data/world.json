@@ -253,8 +253,8 @@
         "Price": 8.3682372165,
         "Armies": [
             {
-                "Owner": "Natives",
-                "Strength": 8.3682372165,
+                "Owner": "NiggaCrash",
+                "Strength": 9.643518518518526,
                 "Fighting": []
             }
         ]
@@ -313,8 +313,17 @@
         "Armies": [
             {
                 "Owner": "Natives",
-                "Strength": 3.0619725066,
-                "Fighting": []
+                "Strength": 1.4420877213579848,
+                "Fighting": [
+                    "NiggaCrash"
+                ]
+            },
+            {
+                "Owner": "NiggaCrash",
+                "Strength": 6.537037037037038,
+                "Fighting": [
+                    "Natives"
+                ]
             }
         ]
     },
@@ -924,7 +933,12 @@
         "Armies": [
             {
                 "Owner": "NiggaCrash",
-                "Strength": 44.90740740740742,
+                "Strength": 10.907407407407419,
+                "Fighting": []
+            },
+            {
+                "Owner": "_factories",
+                "Strength": 4,
                 "Fighting": []
             }
         ]
@@ -1551,6 +1565,11 @@
                 "Owner": "NiggaCrash",
                 "Strength": 10.97269818002049,
                 "Fighting": []
+            },
+            {
+                "Owner": "_factories",
+                "Strength": 5,
+                "Fighting": []
             }
         ]
     },
@@ -1679,7 +1698,12 @@
         "Armies": [
             {
                 "Owner": "NiggaCrash",
-                "Strength": 21.550925925925945,
+                "Strength": 6.550925925925945,
+                "Fighting": []
+            },
+            {
+                "Owner": "_factories",
+                "Strength": 4,
                 "Fighting": []
             }
         ]
@@ -1966,6 +1990,16 @@
             {
                 "Owner": "NiggaCrash",
                 "Strength": 10.73148148148001,
+                "Fighting": []
+            },
+            {
+                "Owner": "_factories",
+                "Strength": 10.244410010708657,
+                "Fighting": []
+            },
+            {
+                "Owner": "Dincio",
+                "Strength": 10,
                 "Fighting": []
             }
         ]
@@ -2347,12 +2381,7 @@
             },
             {
                 "Owner": "_factories",
-                "Strength": 1500,
-                "Fighting": []
-            },
-            {
-                "Owner": "Dincio",
-                "Strength": 0,
+                "Strength": 24.0,
                 "Fighting": []
             }
         ]

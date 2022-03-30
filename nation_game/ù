@@ -1,0 +1,43 @@
+def find_nation(world, nation_code):
+    nation = filter(
+        lambda nat: nat['Country Code'] == nation_code,
+        world
+    )
+    nation = next(nation, None)
+
+    if nation:
+        return Ok(nation)
+
+    nation = filter(
+        lambda nat: nat['Country Name'].lower() == nation_code.replace('_', ' ').lower(),
+        world
+    )
+    nation = next(nation, None)
+
+    if not nation:
+        return Err(f'{nation_code} is not a valid nation code')
+
+    return Ok(nation)
+
+def find_army(world, nation, owner):
+    nation = find_nation(world, nation)
+    if isinstance(nation, Err):
+        return nation
+    nation = nation.value
+    
+    armies = nation.get('Armies', [])
+
+    army = filter(
+        lambda army: army['Owner'] == owner,
+        armies
+    )
+    army = next(army, None)
+    if not army:
+        armies.append({'Owner': owner, 'Strength': 0, 'Fighting': []})
+        army = armies[-1]
+
+    return Ok(army)
+
+nation_occupation_perc(world, nation_code, deploy_from):
+    nat = find_army(world, nation_code, deploy_from)
+    return ['Strength'] / sum(map(lambda a: a['Strength'], nat['Armies']))

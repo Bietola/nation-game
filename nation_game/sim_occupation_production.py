@@ -32,8 +32,8 @@ def step(game, time_delta):
             daily_occ_bonus = nat['Price'] / 20
             occ_bonus = (daily_occ_bonus / DAY) * time_delta
             factories_n = next(filter(
-                lambda a: a['Owner'] == '_factories',
-                armies
+                    lambda a: a['Owner'] == '_factories',
+                    armies
             ), {'Strength': 0})['Strength']
             ind_bonus = 1 + factories_n / nat['Price']
             ind_bonus *= 1.5 if dom_perc > 0.95 else 1

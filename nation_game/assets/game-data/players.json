@@ -3,30 +3,30 @@
         "active": false,
         "energy": [],
         "tot_points": 105,
-        "points": 58.514130261371086
+        "points": 1538.514130261371
     },
     "Bredo_21": {
         "active": false,
         "energy": [],
-        "tot_points": 1428,
-        "points": 24.0
+        "tot_points": 1431,
+        "points": 3.0
     },
     "Lanky_Kong": {
         "active": false,
         "energy": 100,
-        "tot_points": 856,
-        "points": 237.17129629629594
+        "tot_points": 900,
+        "points": 281.17129629629596
     },
     "Chicco420": {
         "active": false,
         "energy": [],
-        "tot_points": 191,
-        "points": 113
+        "tot_points": 207,
+        "points": 129
     },
     "NiggaCrash": {
         "active": false,
         "energy": [],
-        "tot_points": 432,
-        "points": 62.7335547311409
+        "tot_points": 464,
+        "points": 108.7335547311409
     }
 }
