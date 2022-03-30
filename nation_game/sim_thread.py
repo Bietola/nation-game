@@ -9,6 +9,9 @@ def start_sim_thread(step_fun, game, ticks_in_sec, update_secs, name=None):
     # TODO: Add logging levels
     eprint(f'sim thread: {name}: LOG: START')
 
+    # Because accessing a dict can create a race condition
+    game_lock = game['lock']
+
     # TODO: Handle offline sim
     def sim():
         while True:
@@ -16,12 +19,13 @@ def start_sim_thread(step_fun, game, ticks_in_sec, update_secs, name=None):
             time.sleep(update_secs)
 
             nonlocal game
-            game['lock'].acquire()
+            nonlocal game_lock
+            game_lock.acquire()
 
             eprint(f'sim thread: {name}: STEP')
             game = step_fun(game, update_secs * ticks_in_sec)
 
-            game['lock'].release()
+            game_lock.release()
 
     handle = threading.Thread(
         target=sim

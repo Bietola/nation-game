@@ -100,6 +100,8 @@ def nation_game_bot(max_spam_lv=1):
 
     game = nation_game.g_db
 
+    ticks_in_sec = game['sim-speed'] * (50 / 24 / 3600) # 50 ticks = 1 day; sim-speed-x speedup
+
     # Start world simulation
     # TODO: Make sim thread terminations graceful useing the handle
     import war_sim
@@ -107,7 +109,7 @@ def nation_game_bot(max_spam_lv=1):
         name='War',
         step_fun=war_sim.step,
         game=game, # TODO: This is shit
-        ticks_in_sec=game['sim-speed'] * (50 / 24 / 3600), # 50 ticks = 1 day; sim-speed-x speedup
+        ticks_in_sec=ticks_in_sec,
         # update_secs=100,
         update_secs=10 # for DB
     )
@@ -120,6 +122,16 @@ def nation_game_bot(max_spam_lv=1):
         game=nation_game.g_db, # TODO: This is shit
         ticks_in_sec=1, # Not needed...
         update_secs=60 # Save every 1min
+    )
+
+    # NB. Not really a simulation... just saves the game state to disk
+    import sim_occupation_production
+    _occ_b_sim_h = sim_thread.start_sim_thread(
+        name='Occ B.',
+        step_fun=sim_occupation_production.step,
+        game=nation_game.g_db, # TODO: This is shit
+        ticks_in_sec=ticks_in_sec,
+        update_secs=10
     )
 
     # Start bot

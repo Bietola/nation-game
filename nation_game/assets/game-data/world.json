@@ -2346,6 +2346,11 @@
                 "Fighting": []
             },
             {
+                "Owner": "_factories",
+                "Strength": 1500,
+                "Fighting": []
+            },
+            {
                 "Owner": "Dincio",
                 "Strength": 0,
                 "Fighting": []
