@@ -139,9 +139,9 @@ def receive_ans(upd, ctx):
 
     db_set('players', lens[user.username]['active'].set(True), lock=True)
 
-    if db('players')[user.username]['battle_energy'] <= 0:
-        upd.message.reply_text(f'Battle energy over (wait for next recharge)')
-        return RECV_ANS
+#    if db('players')[user.username]['battle_energy'] <= 0:
+#        upd.message.reply_text(f'Battle energy over (wait for next recharge)')
+#        return RECV_ANS
 
     if upd.message.text.lower() == 'ranking':
         upd.message.reply_text(json.dumps(db('players'), indent=4))
