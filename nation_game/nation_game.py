@@ -1,8 +1,10 @@
 from telegram.ext import CommandHandler, ConversationHandler, MessageHandler
 from telegram.ext.filters import Filters
 from numbers import Number
+import operator as op
 import graphviz
 import random
+import math
 import re
 from lenses import lens, bind
 from pathlib import Path
@@ -503,7 +505,11 @@ def show_nation_info(upd, ctx):
 
     # Print piechart of armies
     df = pd.DataFrame.from_dict(
-        nation['Armies']
+        filter(
+            # 1: removes the leading `_`
+            lambda a: a['Owner'][1:] not in SPECIAL_UNIT_TYPES,
+            nation['Armies']
+        )
     )
 
     fig = px.pie(df, values='Strength', names='Owner', title='Test')
@@ -518,7 +524,7 @@ def show_nation_info(upd, ctx):
     # Print attack relationships
     dot = graphviz.Digraph(comment='Offensive plans')
     for army in nation['Armies']:
-        dot.node(army['Owner'])
+        dot.node(f'{army["Owner"]} ({math.floor(army["Strength"])})')
         for opp in army['Fighting']:
             dot.edge(army['Owner'], opp)
 
