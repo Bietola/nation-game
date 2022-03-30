@@ -290,7 +290,13 @@
         "Country Name": "Botswana",
         "Population": 502745,
         "Price": 18.8415383693,
-        "Armies": []
+        "Armies": [
+            {
+                "Owner": "NiggaCrash",
+                "Strength": 3,
+                "Fighting": []
+            }
+        ]
     },
     {
         "Country Code": "BRA",
@@ -312,18 +318,9 @@
         "Price": 3.0619725066,
         "Armies": [
             {
-                "Owner": "Natives",
-                "Strength": 1.4420877213579848,
-                "Fighting": [
-                    "NiggaCrash"
-                ]
-            },
-            {
                 "Owner": "NiggaCrash",
-                "Strength": 6.537037037037038,
-                "Fighting": [
-                    "Natives"
-                ]
+                "Strength": 6.189814814814817,
+                "Fighting": []
             }
         ]
     },
@@ -738,7 +735,12 @@
         "Armies": [
             {
                 "Owner": "Bredo_21",
-                "Strength": 69.0,
+                "Strength": 1.0,
+                "Fighting": []
+            },
+            {
+                "Owner": "NiggaCrash",
+                "Strength": 3,
                 "Fighting": []
             }
         ]
@@ -777,7 +779,7 @@
         "Armies": [
             {
                 "Owner": "Bredo_21",
-                "Strength": 342.5555555555476,
+                "Strength": 339.5555555555476,
                 "Fighting": []
             }
         ]
@@ -2381,7 +2383,7 @@
             },
             {
                 "Owner": "_factories",
-                "Strength": 24.0,
+                "Strength": 97.0,
                 "Fighting": []
             }
         ]

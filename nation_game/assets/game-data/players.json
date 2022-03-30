@@ -8,7 +8,7 @@
     "Bredo_21": {
         "active": false,
         "energy": [],
-        "tot_points": 1431,
+        "tot_points": 1433,
         "points": 3.0
     },
     "Lanky_Kong": {
@@ -27,6 +27,6 @@
         "active": false,
         "energy": [],
         "tot_points": 464,
-        "points": 108.7335547311409
+        "points": 102.7335547311409
     }
 }

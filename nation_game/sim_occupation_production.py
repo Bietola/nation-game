@@ -26,7 +26,11 @@ def step(game, time_delta):
         if dom_pl['Owner'] == 'Natives':
             continue
 
-        dom_perc = dom_pl['Strength'] / sum(map(lambda a: a['Strength'], nat['Armies']))
+        tot_strength = sum(map(lambda a: a['Strength'], nat['Armies']))
+        if tot_strength == 0:
+            continue
+
+        dom_perc = dom_pl['Strength'] / tot_strength
         if dom_perc >= 0.7:
             DAY = 60 * 60 * 24
             daily_occ_bonus = nat['Price'] / 20

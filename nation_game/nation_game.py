@@ -367,7 +367,7 @@ def deploy_units(admin=False, unit_type='Military'):
 
         # NB. This creates an empty army if there isn't one
         nation = find_nation(world, nation_code)
-        if isinstance(army, Err):
+        if isinstance(nation, Err):
             upd.message.reply_text(
                 nation.value
             )
@@ -376,7 +376,7 @@ def deploy_units(admin=False, unit_type='Military'):
 
         if deploy_to == '_factories':
             factories = next(filter(
-                lambda a: a['Owner'] = '_factories',
+                lambda a: a['Owner'] == '_factories',
                 nation['Armies']
             ), {'Strength': 0})['Strength']
             if amount + factories > nation['Price']:
@@ -549,6 +549,14 @@ def show_nation_info(upd, ctx):
         photo=data_path.open('rb')
     )
 
+def gift_points(upd, ctx):
+    rx = ctx.args[0]
+    amount = int(ctx.args[1])
+
+    g_db['players'][rx]['points'] += amount
+
+    return ConversationHandler.END
+
 def monitor_armies(upd, ctx):
     if len(ctx.args) < 1:
         upd.message.reply_text(
@@ -655,6 +663,7 @@ round_handler = ConversationHandler(
 
         # Administrator commands for testing
         CommandHandler('adep', partial(lock_db, deploy_units(admin=True))),
+        CommandHandler('agift', partial(lock_db, gift_points)),
     ],
     states={
         RECV_ANS: [MessageHandler(Filters.text, receive_ans)],
