@@ -4,14 +4,6 @@ from collections import defaultdict
 
 from world import *
 
-def size_advantage_interleave(offender_size, opponents_size):
-    # TODO: Use normal ditribution to reproduce function in `./notes/advanced-size-adv-interleave.png`
-    # TODO: Or just use: `./notes/slightly-more-advanced-size-adv.png`
-    return max(
-        1,
-        offender_size / opponents_size
-    )
-
 def step(game, time_delta):
     world = game['world']
 
@@ -25,7 +17,13 @@ def step(game, time_delta):
         if len(armies) == 0:
             continue
 
-        dom_pl = max(armies, key=lambda a: a['Strength'])
+        dom_pl = max(
+            list(filter(
+                lambda a: a['Owner'] != '_factories',
+                armies,
+            )),
+            key=lambda a: a['Strength']
+        )
 
         # TODO: Use unity properties
         if dom_pl['Owner'] in ['Natives', '_factories']:
@@ -56,6 +54,7 @@ def step(game, time_delta):
 
     # Log total productions
     for pl, prod in tot_production.items():
+        game['players'][pl]['production'] = prod
         game['log'](f'DOM: TOT: {pl}: {prod}')
 
     return game

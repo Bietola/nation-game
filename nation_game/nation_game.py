@@ -63,10 +63,11 @@ g_db = {
     'players': defaultdict(
         lambda: {
             'active': False,
+            'tot_points': 0,
+            'points': 0,
+            'production': 0,
             'solo_energy': 100,
             'battle_energy': 100,
-            'tot_points': 0,
-            'points': 0
         },
         json.loads(Path('./assets/game-data/players.json').open(encoding='utf8').read())
     ),
@@ -325,7 +326,12 @@ def print_world_map(get_color, title='World Map', max_color_range=25000):
     return map_path
 
 def show_ranking(upd, ctx):
-    upd.message.reply_text(json.dumps(db('players'), indent=4))
+    upd.message.reply_text(
+        json.dumps(
+            lens.Recur(Number).modify(lambda x: round(x, 3))(db('players')),
+            indent=4
+        )
+    )
 
 def show_world_map(upd, ctx):
     owner = ctx.args[0] if len(ctx.args) > 0 else 'Natives'

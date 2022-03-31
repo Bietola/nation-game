@@ -2,31 +2,44 @@
     "Dincio": {
         "active": false,
         "energy": [],
+        "production": 3.74619385924707e-05,
         "tot_points": 117,
-        "points": 77.01127604351542
+        "points": 92.77767839023127
     },
     "Bredo_21": {
         "active": false,
         "energy": [],
-        "tot_points": 1497,
-        "points": 2.7049355437768607
+        "production": 0.011756647208023554,
+        "tot_points": 1546,
+        "points": 6.700603921255081
     },
     "Lanky_Kong": {
         "active": false,
         "energy": 100,
-        "tot_points": 1153,
-        "points": 532.2391097774575
+        "production": 0.0007942413620898838,
+        "tot_points": 1275,
+        "points": 342.75363863848315
     },
     "Chicco420": {
         "active": false,
         "energy": [],
-        "tot_points": 207,
-        "points": 129.09631732359364
+        "production": 0.0006632581456169224,
+        "tot_points": 221,
+        "points": 5.445772396922306
     },
     "NiggaCrash": {
         "active": false,
         "energy": [],
-        "tot_points": 577,
-        "points": 42.75205693019475
+        "production": 0.0036654078336541573,
+        "tot_points": 947,
+        "points": 45.917151783785386
+    },
+    "NIggaCrash": {
+        "active": false,
+        "tot_points": 1,
+        "points": 0,
+        "production": 0,
+        "solo_energy": 100,
+        "battle_energy": 100
     }
 }

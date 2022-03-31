@@ -105,6 +105,14 @@ six = "*"
 termcolor = "*"
 
 [[package]]
+name = "funcy"
+version = "1.17"
+description = "A fancy and practical functional tools"
+category = "main"
+optional = false
+python-versions = "*"
+
+[[package]]
 name = "graphviz"
 version = "0.19.1"
 description = "Simple Python interface for Graphviz"
@@ -309,7 +317,7 @@ test = ["pytest-mock (>=3.3)", "pytest (>=4.3)"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "7d8785f9f4ae291eda9e494ef431bb979c8353f72e7d2f2d158585c900e13495"
+content-hash = "b0b499d32041086226df90d24c484b0bb0437ff6115efdd22f8b7a67fe0b74e9"
 
 [metadata.files]
 apscheduler = [
@@ -420,6 +428,10 @@ file-read-backwards = [
 ]
 fire = [
     {file = "fire-0.4.0.tar.gz", hash = "sha256:c5e2b8763699d1142393a46d0e3e790c5eb2f0706082df8f647878842c216a62"},
+]
+funcy = [
+    {file = "funcy-1.17-py2.py3-none-any.whl", hash = "sha256:ba7af5e58bfc69321aaf860a1547f18d35e145706b95d1b3c966abc4f0b60309"},
+    {file = "funcy-1.17.tar.gz", hash = "sha256:40b9b9a88141ae6a174df1a95861f2b82f2fdc17669080788b73a3ed9370e968"},
 ]
 graphviz = [
     {file = "graphviz-0.19.1-py3-none-any.whl", hash = "sha256:f34088c08be2ec16279dfa9c3b4ff3d1453c5c67597a33e2819b000e18d4c546"},

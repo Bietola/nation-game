@@ -19,8 +19,8 @@
         "Price": 60.2935224189,
         "Armies": [
             {
-                "Owner": "Natives",
-                "Strength": 60.2935224189,
+                "Owner": "Chicco420",
+                "Strength": 125.99537037037098,
                 "Fighting": []
             }
         ]
@@ -58,26 +58,14 @@
         "Price": 204.4363035364,
         "Armies": [
             {
-                "Owner": "Natives",
-                "Strength": 108.63710603229195,
-                "Fighting": [
-                    "Dincio",
-                    "NiggaCrash"
-                ]
-            },
-            {
-                "Owner": "Dincio",
-                "Strength": 28.404082630701755,
-                "Fighting": [
-                    "Natives"
-                ]
-            },
-            {
                 "Owner": "NiggaCrash",
-                "Strength": 187.3793880644704,
-                "Fighting": [
-                    "Natives"
-                ]
+                "Strength": 100.5159621385423,
+                "Fighting": []
+            },
+            {
+                "Owner": "_factories",
+                "Strength": 10,
+                "Fighting": []
             }
         ]
     },
@@ -86,13 +74,7 @@
         "Country Name": "Antigua and Barbuda",
         "Population": 54131,
         "Price": 2.0286851455,
-        "Armies": [
-            {
-                "Owner": "Lanky_Kong",
-                "Strength": 15,
-                "Fighting": []
-            }
-        ]
+        "Armies": []
     },
     {
         "Country Code": "ARG",
@@ -335,9 +317,16 @@
         "Price": 3.0619725066,
         "Armies": [
             {
-                "Owner": "NiggaCrash",
-                "Strength": 6.189814814814817,
+                "Owner": "Lanky_Kong",
+                "Strength": 24.79944275324869,
                 "Fighting": []
+            },
+            {
+                "Owner": "NiggaCrash",
+                "Strength": 27,
+                "Fighting": [
+                    "Lanky_Kong"
+                ]
             }
         ]
     },
@@ -504,8 +493,8 @@
         "Price": 7.162704064,
         "Armies": [
             {
-                "Owner": "Natives",
-                "Strength": 7.162704064,
+                "Owner": "NiggaCrash",
+                "Strength": 20,
                 "Fighting": []
             }
         ]
@@ -543,8 +532,8 @@
         "Price": 49.8741511386,
         "Armies": [
             {
-                "Owner": "Natives",
-                "Strength": 49.8741511386,
+                "Owner": "NiggaCrash",
+                "Strength": 25.361111111111185,
                 "Fighting": []
             }
         ]
@@ -752,12 +741,17 @@
         "Armies": [
             {
                 "Owner": "Bredo_21",
-                "Strength": 1.0,
+                "Strength": 2.0,
                 "Fighting": []
             },
             {
                 "Owner": "NiggaCrash",
                 "Strength": 3,
+                "Fighting": []
+            },
+            {
+                "Owner": "_factories",
+                "Strength": 1,
                 "Fighting": []
             }
         ]
@@ -796,7 +790,7 @@
         "Armies": [
             {
                 "Owner": "Bredo_21",
-                "Strength": 300.5555555555476,
+                "Strength": 100.55555555554758,
                 "Fighting": []
             }
         ]
@@ -1016,11 +1010,6 @@
                 "Owner": "Dincio",
                 "Strength": 50,
                 "Fighting": []
-            },
-            {
-                "Owner": "Lanky_Kong",
-                "Strength": 2,
-                "Fighting": []
             }
         ]
     },
@@ -1162,8 +1151,25 @@
         "Armies": [
             {
                 "Owner": "Natives",
-                "Strength": 372.3208583807,
-                "Fighting": []
+                "Strength": 153.04686048292504,
+                "Fighting": [
+                    "NiggaCrash",
+                    "Bredo_21"
+                ]
+            },
+            {
+                "Owner": "Bredo_21",
+                "Strength": 305.463970778934,
+                "Fighting": [
+                    "Natives"
+                ]
+            },
+            {
+                "Owner": "NiggaCrash",
+                "Strength": 4.537037037037038,
+                "Fighting": [
+                    "Natives"
+                ]
             }
         ]
     },
@@ -1441,8 +1447,8 @@
         "Price": 0.549492557,
         "Armies": [
             {
-                "Owner": "Natives",
-                "Strength": 0.549492557,
+                "Owner": "Lanky_Kong",
+                "Strength": 49.76851851851852,
                 "Fighting": []
             }
         ]
@@ -1465,7 +1471,20 @@
         "Country Name": "Mauritius",
         "Population": 659351,
         "Price": 24.7107125189,
-        "Armies": []
+        "Armies": [
+            {
+                "Owner": "Lanky_Kong",
+                "Strength": 43.750000000000014,
+                "Fighting": []
+            },
+            {
+                "Owner": "NiggaCrash",
+                "Strength": 40,
+                "Fighting": [
+                    "Lanky_Kong"
+                ]
+            }
+        ]
     },
     {
         "Country Code": "MEX",
@@ -1648,8 +1667,8 @@
         "Price": 88.888722323,
         "Armies": [
             {
-                "Owner": "Natives",
-                "Strength": 88.888722323,
+                "Owner": "Lanky_Kong",
+                "Strength": 45.370370370368285,
                 "Fighting": []
             }
         ]
@@ -1729,11 +1748,6 @@
                 "Owner": "NiggaCrash",
                 "Strength": 6.550925925925945,
                 "Fighting": []
-            },
-            {
-                "Owner": "_factories",
-                "Strength": 4,
-                "Fighting": []
             }
         ]
     },
@@ -1755,13 +1769,7 @@
         "Country Name": "Palau",
         "Population": 9771,
         "Price": 0.3661909545,
-        "Armies": [
-            {
-                "Owner": "Lanky_Kong",
-                "Strength": 0.6527777777777779,
-                "Fighting": []
-            }
-        ]
+        "Armies": []
     },
     {
         "Country Code": "PAN",
@@ -1776,7 +1784,7 @@
             },
             {
                 "Owner": "_factories",
-                "Strength": 10,
+                "Strength": 20,
                 "Fighting": []
             }
         ]
@@ -1801,8 +1809,13 @@
         "Price": 71.3561545265,
         "Armies": [
             {
-                "Owner": "Natives",
-                "Strength": 71.3561545265,
+                "Owner": "NiggaCrash",
+                "Strength": 89.91280225058804,
+                "Fighting": []
+            },
+            {
+                "Owner": "_factories",
+                "Strength": 5,
                 "Fighting": []
             }
         ]
@@ -2022,13 +2035,18 @@
         "Price": 61.7026698847,
         "Armies": [
             {
-                "Owner": "NiggaCrash",
-                "Strength": 12.73148148148001,
+                "Owner": "_factories",
+                "Strength": 3.1388888888889,
                 "Fighting": []
             },
             {
-                "Owner": "_factories",
-                "Strength": 10.244410010708657,
+                "Owner": "NiggaCrash",
+                "Strength": 38.6422159056375,
+                "Fighting": []
+            },
+            {
+                "Owner": "NIggaCrash",
+                "Strength": 1,
                 "Fighting": []
             }
         ]
@@ -2292,8 +2310,8 @@
         "Price": 17.7841905647,
         "Armies": [
             {
-                "Owner": "NiggaCrash",
-                "Strength": 35.7175925925926,
+                "Owner": "Lanky_Kong",
+                "Strength": 50,
                 "Fighting": []
             }
         ]
@@ -2305,8 +2323,8 @@
         "Price": 59.2334012922,
         "Armies": [
             {
-                "Owner": "Natives",
-                "Strength": 59.2334012922,
+                "Owner": "NiggaCrash",
+                "Strength": 20.49537037036945,
                 "Fighting": []
             }
         ]
@@ -2318,8 +2336,8 @@
         "Price": 2.3077413165,
         "Armies": [
             {
-                "Owner": "Lanky_Kong",
-                "Strength": 47.45370370370355,
+                "Owner": "NiggaCrash",
+                "Strength": 18.079585749613056,
                 "Fighting": []
             }
         ]
@@ -2383,8 +2401,8 @@
         "Price": 0.1994918075,
         "Armies": [
             {
-                "Owner": "Lanky_Kong",
-                "Strength": 49.88425925925925,
+                "Owner": "NiggaCrash",
+                "Strength": 10.144936845735451,
                 "Fighting": []
             }
         ]
@@ -2410,12 +2428,12 @@
         "Armies": [
             {
                 "Owner": "Bredo_21",
-                "Strength": 500.5555007602994,
+                "Strength": 300.5555007602994,
                 "Fighting": []
             },
             {
                 "Owner": "_factories",
-                "Strength": 254.0,
+                "Strength": 300.6527777777777,
                 "Fighting": []
             }
         ]
@@ -2490,13 +2508,7 @@
         "Country Name": "Vanuatu",
         "Population": 63689,
         "Price": 2.3868934295,
-        "Armies": [
-            {
-                "Owner": "Lanky_Kong",
-                "Strength": 35.701081492664166,
-                "Fighting": []
-            }
-        ]
+        "Armies": []
     },
     {
         "Country Code": "VEN",
