@@ -64,7 +64,7 @@
             },
             {
                 "Owner": "_factories",
-                "Strength": 10,
+                "Strength": 151.32176221316223,
                 "Fighting": []
             }
         ]
@@ -163,7 +163,16 @@
             {
                 "Owner": "Natives",
                 "Strength": 6.0873296656,
-                "Fighting": []
+                "Fighting": [
+                    "NiggaCrash"
+                ]
+            },
+            {
+                "Owner": "NiggaCrash",
+                "Strength": 10,
+                "Fighting": [
+                    "Natives"
+                ]
             }
         ]
     },
@@ -315,20 +324,7 @@
         "Country Name": "Brunei Darussalam",
         "Population": 81702,
         "Price": 3.0619725066,
-        "Armies": [
-            {
-                "Owner": "Lanky_Kong",
-                "Strength": 24.79944275324869,
-                "Fighting": []
-            },
-            {
-                "Owner": "NiggaCrash",
-                "Strength": 27,
-                "Fighting": [
-                    "Lanky_Kong"
-                ]
-            }
-        ]
+        "Armies": []
     },
     {
         "Country Code": "BGR",
@@ -1003,12 +999,12 @@
         "Armies": [
             {
                 "Owner": "NiggaCrash",
-                "Strength": 0.703832940435106,
+                "Strength": 1.703832940435106,
                 "Fighting": []
             },
             {
-                "Owner": "Dincio",
-                "Strength": 50,
+                "Owner": "_factories",
+                "Strength": 6,
                 "Fighting": []
             }
         ]
@@ -1150,26 +1146,9 @@
         "Price": 372.3208583807,
         "Armies": [
             {
-                "Owner": "Natives",
-                "Strength": 153.04686048292504,
-                "Fighting": [
-                    "NiggaCrash",
-                    "Bredo_21"
-                ]
-            },
-            {
                 "Owner": "Bredo_21",
-                "Strength": 305.463970778934,
-                "Fighting": [
-                    "Natives"
-                ]
-            },
-            {
-                "Owner": "NiggaCrash",
-                "Strength": 4.537037037037038,
-                "Fighting": [
-                    "Natives"
-                ]
+                "Strength": 100.92461892707644,
+                "Fighting": []
             }
         ]
     },
@@ -1272,7 +1251,7 @@
         "Armies": [
             {
                 "Owner": "Bredo_21",
-                "Strength": 150.6249999999983,
+                "Strength": 100.6249999999983,
                 "Fighting": []
             }
         ]
@@ -1343,8 +1322,8 @@
         "Price": 104.132624762,
         "Armies": [
             {
-                "Owner": "Natives",
-                "Strength": 104.132624762,
+                "Owner": "Bredo_21",
+                "Strength": 108.48693664426175,
                 "Fighting": []
             }
         ]
@@ -1471,20 +1450,7 @@
         "Country Name": "Mauritius",
         "Population": 659351,
         "Price": 24.7107125189,
-        "Armies": [
-            {
-                "Owner": "Lanky_Kong",
-                "Strength": 43.750000000000014,
-                "Fighting": []
-            },
-            {
-                "Owner": "NiggaCrash",
-                "Strength": 40,
-                "Fighting": [
-                    "Lanky_Kong"
-                ]
-            }
-        ]
+        "Armies": []
     },
     {
         "Country Code": "MEX",
@@ -1784,7 +1750,7 @@
             },
             {
                 "Owner": "_factories",
-                "Strength": 20,
+                "Strength": 36.26076221095473,
                 "Fighting": []
             }
         ]
@@ -2220,7 +2186,7 @@
             },
             {
                 "Owner": "_factories",
-                "Strength": 13.7886353756,
+                "Strength": 24.5772707512,
                 "Fighting": []
             }
         ]
@@ -2388,8 +2354,8 @@
         "Price": 60.085823077,
         "Armies": [
             {
-                "Owner": "Natives",
-                "Strength": 60.085823077,
+                "Owner": "Bredo_21",
+                "Strength": 83.11143759982393,
                 "Fighting": []
             }
         ]
@@ -2433,7 +2399,7 @@
             },
             {
                 "Owner": "_factories",
-                "Strength": 300.6527777777777,
+                "Strength": 325.1531621404263,
                 "Fighting": []
             }
         ]
