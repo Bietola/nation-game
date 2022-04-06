@@ -1,4 +1,4 @@
-from nation_game import flush_db
+from bot import flush_db
 
 
 # NB. Recharges the energy of players

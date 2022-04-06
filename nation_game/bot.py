@@ -22,9 +22,10 @@ from threading import Lock
 from itertools import islice
 from functools import partial
 
-import utils
-import emoji_utils as emjutl
-from world import *
+import nation_game.utils as utils
+import nation_game.emoji_utils as emjutl
+from nation_game.world import *
+import nation_game.paths as paths
 
 # Constants
 NG_PHASE_DELTA = 60 * 5
@@ -44,7 +45,7 @@ g_ng_phase_start_t = time.time()
 RECV_ANS = range(1)
 
 def _log(contents):
-    log_file = (Path(__file__).parent / 'log.txt')
+    log_file = paths.ASSETS / 'log.txt'
     log_path = log_file.resolve()
 
     with FileReadBackwards(log_path, encoding='utf-8') as logf:
@@ -69,10 +70,10 @@ g_db = {
             'solo_energy': 100,
             'battle_energy': 100,
         },
-        json.loads(Path('./assets/game-data/players.json').open(encoding='utf8').read())
+        json.loads((paths.GAME_DATA / 'players.json').open(encoding='utf8').read())
     ),
-    
-    'world': json.loads(Path('./assets/game-data/world.json').open(encoding='utf8').read()),
+
+    'world': json.loads((paths.GAME_DATA / 'world.json').open(encoding='utf8').read()),
 
     'lock': Lock(),
     'sim-speed': 20,
@@ -121,7 +122,7 @@ def flush_db(field=None):
             flush_db(f)
         return
 
-    Path(f'./assets/game-data/{field}.json').write_text(
+    (paths.GAME_DATA / f'{field}.json').write_text(
         json.dumps(g_db[field], indent=4),
         encoding="utf-8"
     )
@@ -241,7 +242,7 @@ def dump_log(upd, ctx, ret=True):
 
     pattern = re.compile(pattern)
     with FileReadBackwards(
-        (Path(__file__).parent / 'log.txt'),
+        paths.LOG,
         encoding='utf-8'
     ) as logf:
         lines = list(islice(filter(
@@ -293,12 +294,12 @@ def show_todo(upd, ctx):
 
     if todo_file == 'list':
         upd.message.reply_text(
-            list(map(lambda p: p.name, (Path(__file__).parent / 'todo').rglob('*')))
+            list(map(lambda p: p.name, (paths.ASSETS / 'todo').rglob('*')))
         )
         return ConversationHandler.END
 
     upd.message.reply_text(
-        (Path(__file__).parent / f'todo/{todo_file}.md')
+        (paths.ASSETS / f'todo/{todo_file}.md')
         .open(encoding='utf8').read()
     )
     return ConversationHandler.END
@@ -320,7 +321,7 @@ def print_world_map(get_color, title='World Map', max_color_range=25000):
         range_color=(0, max_color_range)
     )
 
-    map_path = Path(__file__).parent / 'assets/cache/world-map.png'
+    map_path = paths.CACHE / 'world-map.png'
     fig.write_image(map_path)
 
     return map_path
@@ -574,7 +575,7 @@ def show_nation_info(upd, ctx):
     )
 
     fig = px.pie(df, values='Strength', names='Owner', title='Test')
-    data_path = Path(__file__).parent / 'assets/cache/nation-info-armies.png'
+    data_path = paths.CACHE / 'nation-info-armies.png'
     fig.write_image(data_path)
 
     ctx.bot.send_photo(
@@ -589,7 +590,7 @@ def show_nation_info(upd, ctx):
         for opp in army['Fighting']:
             dot.edge(army['Owner'], opp)
 
-    data_path = Path(__file__).parent / 'assets/cache/nation-info-att'
+    data_path = paths.CACHE / 'nation-info-att'
     dot.render(data_path, format='png')
     data_path = data_path.parent / (data_path.name + '.png')
 

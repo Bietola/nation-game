@@ -1,5 +1,5 @@
 from result import Err, Ok
-import nation_game
+import nation_game.bot as bot
 
 def find_nation(world, nation_code):
     nation = filter(
@@ -59,6 +59,6 @@ def nation_occupation_perc(world, nation_code, deploy_from):
             nation['Armies']
         )
     ))
-    nation_game.g_db['log'](f'DB: {nation["Country Name"]}: {tot_strength}')
+    bot.g_db['log'](f'DB: {nation["Country Name"]}: {tot_strength}')
 
     return Ok(army['Strength'] / tot_strength)

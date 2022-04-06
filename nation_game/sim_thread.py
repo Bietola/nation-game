@@ -1,6 +1,6 @@
 import time
 import threading
-from utils import eprint
+from nation_game.utils import eprint
 
 def start_sim_thread(step_fun, game, ticks_in_sec, update_secs, name=None):
     if not name:
