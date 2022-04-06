@@ -28,7 +28,7 @@ from world import *
 
 # Constants
 NG_PHASE_DELTA = 60 * 5
-WAR_PHASE_DELTA = 60 * 1
+WAR_PHASE_DELTA = 30 * 1
 NG_ENABLED_GROUPS = [-1001641644487] # TODO: Make this configurable
 
 # To be enums

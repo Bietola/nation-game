@@ -61,4 +61,7 @@ def nation_occupation_perc(world, nation_code, deploy_from):
     ))
     nation_game.g_db['log'](f'DB: {nation["Country Name"]}: {tot_strength}')
 
+    if tot_strength == 0:
+        return Ok(0)
+
     return Ok(army['Strength'] / tot_strength)
