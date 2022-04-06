@@ -45,7 +45,7 @@ g_ng_phase_start_t = time.time()
 RECV_ANS = range(1)
 
 def _log(contents):
-    log_file = paths.ASSETS / 'log.txt'
+    log_file = paths.LOG
     log_path = log_file.resolve()
 
     with FileReadBackwards(log_path, encoding='utf-8') as logf:
@@ -259,6 +259,8 @@ def dump_log(upd, ctx, ret=True):
         return ConversationHandler.END
 
 def list_occupied_nations(upd, ctx):
+    global g_db
+
     if len(ctx.args) > 1:
         upd.message.reply_text(
             'Usage: `/lsoc <PLAYER>'
@@ -274,8 +276,12 @@ def list_occupied_nations(upd, ctx):
     for nation in db('world'):
         for army in nation['Armies']:
             if army['Owner'] == owner:
+                world = db('world')
+                occ_perc = int(
+                    nation_occupation_perc(world, nation["Country Code"], army["Owner"]).value * 100
+                )
                 reply.append(
-                    f'{nation["Country Name"]}: {round(army["Strength"], 2)} ({perc(nation, army)})'
+                    f'{nation["Country Name"]}: {round(army["Strength"], 2)} ({occ_perc})'
                 )
 
     if len(reply) == 0:
