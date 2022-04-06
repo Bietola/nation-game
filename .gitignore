@@ -142,5 +142,5 @@ cython_debug/
 
 # BEGIN CUSTOM
 # Game cache
-nation_game/data/cache
-nation_game/data/game-data
+nation_game/data/cache/
+nation_game/data/game-data/
