@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from utils import SRC_PATH
+from nation_game.utils import SRC_PATH
 
 # TODO: Find out why duplicates exist
 class RegChats:

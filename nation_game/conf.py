@@ -1,4 +1,4 @@
-from utils import eprint
+from nation_game.utils import eprint
 
 _conf = {}
 

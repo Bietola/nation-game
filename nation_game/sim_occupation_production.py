@@ -2,7 +2,7 @@ import operator as op
 from lenses import lens
 from collections import defaultdict
 
-from world import *
+from nation_game.world import *
 
 def step(game, time_delta):
     world = game['world']

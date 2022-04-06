@@ -1,4 +1,4 @@
-from nation_game import flush_db
+from nation_game.bot import flush_db
 
 
 # NB. Not really a simulation... just saves the game state to disk
