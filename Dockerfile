@@ -1,17 +1,19 @@
-FROM python:3.10.0
+FROM python:3.10.0-slim
 
 # Update apt
 RUN apt-get update -y
 RUN apt-get upgrade -y
 
-# Install Poetry - respects $POETRY_VERSION & $POETRY_HOME
-RUN curl -sSL https://install.python-poetry.org | python -
-ENV PATH="/root/.local/bin:$PATH"
-
 # Packages used by poetry dependencies
 RUN apt-get install -y graphviz
 # Interactive command line dependencies
 RUN apt-get install -y screen
+# To install poetry
+RUN apt-get install -y curl git
+
+# Install Poetry - respects $POETRY_VERSION & $POETRY_HOME
+RUN curl -sSL https://install.python-poetry.org | python -
+ENV PATH="/root/.local/bin:$PATH"
 
 # Copy only requirements to cache them in docker layer
 WORKDIR /code
