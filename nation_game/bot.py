@@ -10,6 +10,7 @@ from file_read_backwards import FileReadBackwards
 from lenses import lens, bind
 from collections import defaultdict
 import json
+import pickle
 import pandas as pd
 import plotly.express as px
 from pathlib import Path
@@ -70,10 +71,14 @@ g_db = {
             'solo_energy': 100,
             'battle_energy': 100,
         },
-        json.loads((paths.GAME_DATA / 'players.json').open(encoding='utf8').read())
+        pickle.loads(
+            (paths.GAME_DATA / 'players.pickle').read_bytes()
+        )
     ),
 
-    'world': json.loads((paths.GAME_DATA / 'world.json').open(encoding='utf8').read()),
+    'world': pickle.loads(
+        (paths.GAME_DATA / 'world.pickle').read_bytes()
+    ),
 
     'lock': Lock(),
     'sim-speed': 20,
@@ -122,9 +127,12 @@ def flush_db(field=None):
             flush_db(f)
         return
 
-    (paths.GAME_DATA / f'{field}.json').write_text(
-        json.dumps(g_db[field], indent=4),
-        encoding="utf-8"
+    if isinstance(g_db[field], defaultdict):
+        to_pickle = dict(g_db[field])
+    else:
+        to_pickle = g_db[field]
+    (paths.GAME_DATA / f'{field}.pickle').write_bytes(
+        pickle.dumps(to_pickle)
     )
 
 # Extract name of flag from flag emoji
@@ -611,6 +619,8 @@ def gift_points(upd, ctx):
 
     g_db['players'][rx]['points'] += amount
 
+    upd.message.reply_text('Points gifted')
+
     return ConversationHandler.END
 
 def monitor_armies(upd, ctx):
@@ -730,11 +740,9 @@ round_handler = ConversationHandler(
         CommandHandler('lsoc', list_occupied_nations),
         CommandHandler('todo', show_todo),
         CommandHandler('speed', show_speed),
-        CommandHandler('dump', dump_log),
+        CommandHandler('dump', dump_log)
 
-        # Administrator commands for testing
-        CommandHandler('adep', partial(lock_db, deploy_units(admin=True))),
-        CommandHandler('agift', partial(lock_db, gift_points))
+        # Administrator commands used to be here. f
     ],
     states={
         RECV_ANS: [MessageHandler(Filters.text, receive_ans)],
