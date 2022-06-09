@@ -34,6 +34,7 @@ WAR_PHASE_DELTA = 30 * 1
 NG_ENABLED_GROUPS = [-1001641644487] # TODO: Make this configurable
 
 # To be enums
+ALL_SCOPES = ['world', 'usa', 'europe', 'asia', 'africa', 'north_america', 'south_america']
 UNIT_TYPES = ['military', 'factories']
 SPECIAL_UNIT_TYPES = ['factories']
 
@@ -318,7 +319,9 @@ def show_todo(upd, ctx):
     )
     return ConversationHandler.END
 
-def print_world_map(get_color, title='World Map', max_color_range=25000):
+def print_world_map(get_color, title='World Map', scope='world', max_color_range=25000):
+    scope = scope.replace('_', ' ')
+
     df = pd.DataFrame.from_dict(
         db('world')
     )
@@ -330,6 +333,7 @@ def print_world_map(get_color, title='World Map', max_color_range=25000):
         locations='Country Code',
         color='Color',
         hover_name='Country Name',
+        scope=scope,
         title=title,
         color_continuous_scale='Viridis',
         range_color=(0, max_color_range)
@@ -350,10 +354,12 @@ def show_ranking(upd, ctx):
 
 def show_world_map(upd, ctx):
     owner = ctx.args[0] if len(ctx.args) > 0 else 'Natives'
-    max_color_range = int(ctx.args[1]) if len(ctx.args) > 1 else 25000
+    scope = ctx.args[1] if len(ctx.args) > 1 else 'world'
+    max_color_range = int(ctx.args[2]) if len(ctx.args) > 2 else 25000
 
     map_path = print_world_map(
         title=f'Armies of {owner}',
+        scope=scope,
         max_color_range=max_color_range,
         get_color=lambda nation: next(filter(
             lambda army: army['Owner'] == owner,
@@ -740,7 +746,8 @@ round_handler = ConversationHandler(
         CommandHandler('lsoc', list_occupied_nations),
         CommandHandler('todo', show_todo),
         CommandHandler('speed', show_speed),
-        CommandHandler('dump', dump_log)
+        CommandHandler('dump', dump_log),
+        CommandHandler('scopes', lambda upd, ctx: upd.message.reply_text(f'{ALL_SCOPES}'))
 
         # Administrator commands used to be here. f
     ],

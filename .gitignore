@@ -145,3 +145,5 @@ cython_debug/
 nation_game/data/cache/
 # Game data
 ## nation_game/data/game-data/
+# Log (too big)
+nation_game/data/game-data/log.txt
