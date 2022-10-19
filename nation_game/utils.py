@@ -6,7 +6,7 @@ from inspect import getsourcefile
 import time
 from funcy import compose
 from result import Err, Ok
-from functools import partial, reduce
+from functools import partial, reduce, wraps
 import operator as op
 
 SRC_PATH = Path(os.path.abspath(getsourcefile(lambda:0))).parent
@@ -62,3 +62,10 @@ def unique_prefix_match(validator, to_validate):
 
     else:
         return Ok(prefix_matches[0])
+
+def awaitify(sync_func):
+    """Wrap a synchronous callable to allow ``await``'ing it"""
+    @wraps(sync_func)
+    async def async_func(*args, **kwargs):
+        return sync_func(*args, **kwargs)
+    return async_func

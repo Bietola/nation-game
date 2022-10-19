@@ -1,6 +1,6 @@
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import CommandHandler, ConversationHandler, MessageHandler
-from telegram.ext.filters import Filters
+from telegram.ext import CommandHandler, CallbackQueryHandler, ConversationHandler, MessageHandler
+import telegram.ext.filters as filters
 from numbers import Number
 import operator as op
 import graphviz
@@ -25,6 +25,7 @@ from itertools import islice
 from functools import partial
 
 import nation_game.utils as utils
+from nation_game.utils import awaitify
 import nation_game.emoji_utils as emjutl
 from nation_game.world import *
 import nation_game.paths as paths
@@ -153,15 +154,15 @@ extract_flag_name.re = re.compile(r'^flag:\s(.*)$')
 # > No, 9 guesses left for Chicco
 # Italy
 # > Davide wins! 10 wood, 2 bronze victories in all
-def start_round(upd, ctx):
-    def send_txt(txt):
-        ctx.bot.send_message(
+async def start_round(upd, ctx):
+    async def send_txt(txt):
+        await ctx.bot.send_message(
             chat_id=upd.effective_chat.id,
             text=txt
         )
 
     if upd.effective_chat.id not in NG_ENABLED_GROUPS:
-        send_txt(f'smh [ng not allowed in group id {upd.effective_chat.id}]')
+        await send_txt(f'smh [ng not allowed in group id {upd.effective_chat.id}]')
         return ConversationHandler.END
 
     global g_ng_phase_start_t
@@ -176,10 +177,10 @@ def start_round(upd, ctx):
     time_left = round(cur_phase_delta - delta)
 
     if not g_ng_ok:
-        send_txt(f'No ng you fool, go do war [t-{time_left}]')
+        await send_txt(f'No ng you fool, go do war [t-{time_left}]')
         return ConversationHandler.END
 
-    send_txt(f'Let the game commence [t-{time_left}]')
+    await send_txt(f'Let the game commence [t-{time_left}]')
 
     round_starter = upd.message.from_user.username 
     db_set('players', lens[round_starter]['active'].set(True), lock=True)
@@ -187,14 +188,14 @@ def start_round(upd, ctx):
     global g_chosen_flag
     g_chosen_flag = random.choice(
         list(filter(lambda e: 'flag' in e['name'], emjutl.db())))
-    send_txt(g_chosen_flag['emoji'])
+    await send_txt(g_chosen_flag['emoji'])
 
     return RECV_ANS
 
 def cancel_round(upd, ctx):
     return ConversationHandler.END
 
-def receive_ans(upd, ctx):
+async def receive_ans(upd, ctx):
     user = upd.message.from_user
 
     db_set('players', lens[user.username]['active'].set(True), lock=True)
@@ -204,15 +205,15 @@ def receive_ans(upd, ctx):
 #        return RECV_ANS
 
     if upd.message.text.lower() == 'ranking':
-        upd.message.reply_text(json.dumps(db('players'), indent=4))
+        await upd.message.reply_text(json.dumps(db('players'), indent=4))
         return RECV_ANS
 
     elif upd.message.text.lower() == 'cheat':
-        upd.message.reply_text(f'answer: {g_chosen_flag["name"]}')
+        await upd.message.reply_text(f'answer: {g_chosen_flag["name"]}')
         return RECV_ANS
 
     elif upd.message.text.lower() == 'cancel':
-        upd.message.reply_text(f'No more (answer: {g_chosen_flag["name"]})')
+        await upd.message.reply_text(f'No more (answer: {g_chosen_flag["name"]})')
         db_set('players', lens.Values()['active'].set(False))
         return ConversationHandler.END
 
@@ -234,7 +235,7 @@ def receive_ans(upd, ctx):
         winner['points'] += prize
         winner['tot_points'] += prize
 
-        upd.message.reply_text(
+        await upd.message.reply_text(
             f'{user.name} is the winner (+{prize}) [{round(winner["points"], 4)}/{winner["tot_points"]}]'
         )
 
@@ -243,10 +244,10 @@ def receive_ans(upd, ctx):
         return ConversationHandler.END
 
     else:
-        upd.message.reply_text(f'{user.name}, you are wrong D:')
+        await upd.message.reply_text(f'{user.name}, you are wrong D:')
         return RECV_ANS
 
-def dump_log(upd, ctx, ret=True):
+async def dump_log(upd, ctx, ret=True):
     pattern = ctx.args[0] if len(ctx.args) >= 1 else '.*'
     lines_back = int(ctx.args[1]) if len(ctx.args) >= 2 else 5
 
@@ -261,18 +262,18 @@ def dump_log(upd, ctx, ret=True):
         ), lines_back))
         lines.reverse()
 
-        upd.message.reply_text(
+        await upd.message.reply_text(
             '\n'.join(lines) if len(lines) != 0 else 'No messages?'
         )
 
     if ret:
         return ConversationHandler.END
 
-def list_occupied_nations(upd, ctx):
+async def list_occupied_nations(upd, ctx):
     global g_db
 
     if len(ctx.args) > 1:
-        upd.message.reply_text(
+        await upd.message.reply_text(
             'Usage: `/lsoc <PLAYER>'
         )
         return ConversationHandler.END
@@ -295,30 +296,30 @@ def list_occupied_nations(upd, ctx):
                 )
 
     if len(reply) == 0:
-        upd.message.reply_text('No armies?')
+        await upd.message.reply_text('No armies?')
     else:
-        upd.message.reply_text('\n'.join(reply))
+        await upd.message.reply_text('\n'.join(reply))
 
-def show_speed(upd, ctx):
-    upd.message.reply_text(
+async def show_speed(upd, ctx):
+    await upd.message.reply_text(
         f'{db("sim-speed")}x'
     )
     return ConversationHandler.END
 
-def show_map_scopes(upd, ctx):
-    upd.message.reply_text(f'{ALL_SCOPES}')
+async def show_map_scopes(upd, ctx):
+    await upd.message.reply_text(f'{ALL_SCOPES}')
     return ConversationHandler.END
 
-def show_todo(upd, ctx):
+async def show_todo(upd, ctx):
     todo_file = ctx.args[0] if len(ctx.args) > 0 else 'main'
 
     if todo_file == 'list':
-        upd.message.reply_text(
+        await upd.message.reply_text(
             list(map(lambda p: p.name, (paths.ASSETS / 'todo').rglob('*')))
         )
         return ConversationHandler.END
 
-    upd.message.reply_text(
+    await upd.message.reply_text(
         (paths.ASSETS / f'todo/{todo_file}.md')
         .open(encoding='utf8').read()
     )
@@ -349,15 +350,17 @@ def print_world_map(get_color, title='World Map', scope='world', max_color_range
 
     return map_path
 
-def show_ranking(upd, ctx):
-    upd.message.reply_text(
+async def show_ranking(upd, ctx):
+    await upd.message.reply_text(
         json.dumps(
             lens.Recur(Number).modify(lambda x: round(x, 3))(db('players')),
             indent=4
         )
     )
 
-def show_world_map(upd, ctx):
+    return ConversationHandler.END
+
+async def show_world_map(upd, ctx):
     owner = ctx.args[0] if len(ctx.args) > 0 else 'Natives'
     scope = ctx.args[1] if len(ctx.args) > 1 else 'world'
     max_color_range = int(ctx.args[2]) if len(ctx.args) > 2 else 25000
@@ -372,28 +375,28 @@ def show_world_map(upd, ctx):
         ), {'Strength': 0})['Strength'],
     )
 
-    ctx.bot.send_photo(
+    await ctx.bot.send_photo(
         chat_id=upd.effective_chat.id,
         photo=map_path.open('rb')
     )
 
-def save_game(upd, ctx):
+async def save_game(upd, ctx):
     flush_db('players')
-    ctx.bot.send_message(
+    await ctx.bot.send_message(
         chat_id=upd.effective_chat.id,
         text='Player data saved'
     )
 
     flush_db('world')
-    ctx.bot.send_message(
+    await ctx.bot.send_message(
         chat_id=upd.effective_chat.id,
         text='World map saved'
     )
 
 def deploy_units(admin=False, unit_type='Military'):
-    def handler(upd, ctx):
+    async def handler(upd, ctx):
         if len(ctx.args) < 2:
-            upd.message.reply_text(
+            await upd.message.reply_text(
                 'Usage: `/dep NATION_CODE AMOUNT TYPE? (+/-)OPPONENTS*'
             )
             return
@@ -410,12 +413,12 @@ def deploy_units(admin=False, unit_type='Military'):
             UNIT_TYPES
         ))
         if len(valid_unit_types) == 0:
-            upd.message.reply_text(
+            await upd.message.reply_text(
                 'ERR: Malformed unit type.'
             )
             return ConversationHandler.END
         elif len(valid_unit_types) > 1:
-            upd.message.reply_text(
+            await upd.message.reply_text(
                 'ERR: Ambiguous unit type.\n'
                 '\n'.join(valid_unit_types)
             )
@@ -435,7 +438,7 @@ def deploy_units(admin=False, unit_type='Military'):
         players = db('players')
 
         if not admin and amount > players[deploy_from]['points']:
-            upd.message.reply_text(
+            await upd.message.reply_text(
                 f'Not enough points, deploying all ({players[deploy_from]["points"]})'
             )
             amount = players[deploy_from]['points']
@@ -443,7 +446,7 @@ def deploy_units(admin=False, unit_type='Military'):
         # NB. This creates an empty army if there isn't one
         nation = find_nation(world, nation_code)
         if isinstance(nation, Err):
-            upd.message.reply_text(
+            await upd.message.reply_text(
                 nation.value
             )
             return
@@ -455,17 +458,17 @@ def deploy_units(admin=False, unit_type='Military'):
                 nation['Armies']
             ), {'Strength': 0})['Strength']
             if amount + factories > nation['Price']:
-                upd.message.reply_text(
+                await upd.message.reply_text(
                     f'Too many {deploy_to} units! Building max ({nation["Price"]}).'
                 )
                 amount = nation['Price']
             if amount < 0:
-                upd.message.reply_text(
+                await upd.message.reply_text(
                     f'ERR: Can\'t {deploy_to} units not removable.'
                 )
                 return ConversationHandler.END
             if nation_occupation_perc(world, nation_code, deploy_from).value < 0.7:
-                upd.message.reply_text(
+                await upd.message.reply_text(
                     f'ERR: Can\'t deploy {deploy_to} units, occupation needed.'
                 )
                 return ConversationHandler.END
@@ -473,14 +476,14 @@ def deploy_units(admin=False, unit_type='Military'):
         # NB. This creates an empty army if there isn't one
         army = find_army(world, nation_code, deploy_to)
         if isinstance(army, Err):
-            upd.message.reply_text(
+            await upd.message.reply_text(
                 army.value
             )
             return
         army = army.value
 
         if amount < -army['Strength']:
-            upd.message.reply_text(
+            await upd.message.reply_text(
                 f'Not enough soldiers, full retreat (-{army["Strength"]})'
             )
             amount = -army['Strength']
@@ -491,9 +494,9 @@ def deploy_units(admin=False, unit_type='Military'):
 
         res = apply_offensive_opts(deploy_from, nation_code, off_opts)
         if isinstance(res, Err):
-            upd.message.reply_text(res.value)
+            await upd.message.reply_text(res.value)
 
-        upd.message.reply_text('Sucessfuly deployed')
+        await upd.message.reply_text('Sucessfuly deployed')
 
     return handler
 
@@ -547,9 +550,9 @@ def begin_offensive(upd, ctx):
     else:
         upd.message.reply_text('Offensive plan executed')
 
-def show_nation_info_raw(upd, ctx):
+async def show_nation_info_raw(upd, ctx):
     if len(ctx.args) != 1:
-        upd.message.reply_text(
+        await upd.message.reply_text(
             'Usage: raw (NATION_CODE or NATION_NAME)'
         )
         return
@@ -560,17 +563,17 @@ def show_nation_info_raw(upd, ctx):
 
     res = find_nation(world, nation_code)
     if isinstance(res, Err):
-        upd.message.reply_text(res.value)
+        await upd.message.reply_text(res.value)
     nation = res.value
 
-    upd.message.reply_text(json.dumps(
+    await upd.message.reply_text(json.dumps(
         lens.Recur(Number).modify(lambda x: round(x, 3))(nation),
         indent=4
     ))
 
-def show_nation_info(upd, ctx):
+async def show_nation_info(upd, ctx):
     if len(ctx.args) != 1:
-        upd.message.reply_text(
+        await upd.message.reply_text(
             'Usage: nati (NATION_CODE or NATION_NAME)'
         )
         return
@@ -581,10 +584,10 @@ def show_nation_info(upd, ctx):
 
     res = find_nation(world, nation_code)
     if isinstance(res, Err):
-        upd.message.reply_text(res.value)
+        await upd.message.reply_text(res.value)
     nation = res.value
 
-    upd.message.reply_text(json.dumps(
+    await upd.message.reply_text(json.dumps(
         # lens.Recur(Number).modify(lambda x: round(x, 3))(nation),
         lens.Item('Armies').set(None)(nation),
         indent=4
@@ -603,7 +606,7 @@ def show_nation_info(upd, ctx):
     data_path = paths.CACHE / 'nation-info-armies.png'
     fig.write_image(data_path)
 
-    ctx.bot.send_photo(
+    await ctx.bot.send_photo(
         chat_id=upd.effective_chat.id,
         photo=data_path.open('rb')
     )
@@ -619,7 +622,7 @@ def show_nation_info(upd, ctx):
     dot.render(data_path, format='png')
     data_path = data_path.parent / (data_path.name + '.png')
 
-    ctx.bot.send_photo(
+    await ctx.bot.send_photo(
         chat_id=upd.effective_chat.id,
         photo=data_path.open('rb')
     )
@@ -709,8 +712,8 @@ def monitor_armies(upd, ctx):
 
 monitor_armies.threads = {}
 
-def show_help(upd, ctx):
-    upd.message.reply_text(
+async def show_help(upd, ctx):
+    await upd.message.reply_text(
         '/help: Show this message\n'
         '/ng: Play a round of *Nation Game*\n'
         '/map <PLAYER> <RESOLUTION>: Show the world map with PLAYER army size\n'
@@ -728,26 +731,58 @@ def show_help(upd, ctx):
         '/speed: Show simulation speed\n'
     )
 
-def lock_db(fun, *args):
-    global g_db
-    db('lock').acquire()
+def lock_db(fun):
+    async def ret(*args):
+        global g_db
+        db('lock').acquire()
 
-    fun(*args)
+        await fun(*args)
 
-    db('lock').release()
+        db('lock').release()
+    return ret
+
+async def button_launch(upd, ctx) -> None:
+    """Sends a message with three inline buttons attached."""
+    keyboard = [
+        [
+            InlineKeyboardButton("Option 1", callback_data="1"),
+            InlineKeyboardButton("Option 2", callback_data="2"),
+        ],
+        [InlineKeyboardButton("Option 3", callback_data="3")],
+    ]
+
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
+    await upd.message.reply_text("Please choose:", reply_markup=reply_markup)
+
+    return ConversationHandler.END
+
+async def button(upd, ctx) -> None:
+    """Parses the CallbackQuery and updates the message text."""
+    query = upd.callback_query
+
+    # CallbackQueries need to be answered, even if no notification to the user is needed
+    # Some clients may have trouble otherwise. See https://core.telegram.org/bots/api#callbackquery
+    await query.answer()
+
+    await query.edit_message_text(text=f"Selected option: {query.data}")
 
 round_handler = ConversationHandler(
     entry_points=[
+        CommandHandler('test', button_launch),
         CommandHandler('help', show_help),
         CommandHandler('ng', start_round),
         CommandHandler('rank', show_ranking),
         CommandHandler('map', show_world_map),
-        CommandHandler('save', partial(lock_db, save_game)),
-        CommandHandler('dep', partial(lock_db, deploy_units())),
-        CommandHandler('att', partial(lock_db, begin_offensive)),
+        CommandHandler('save', lock_db(save_game)),
+        CommandHandler('dep', lock_db(deploy_units())),
+        CommandHandler('att', lock_db(begin_offensive)),
         CommandHandler('nati', show_nation_info),
         CommandHandler('raw', show_nation_info_raw),
+
+        # TODO: Convert these into PTB v20 with async
         CommandHandler('mon', monitor_armies),
+
         CommandHandler('lsoc', list_occupied_nations),
         CommandHandler('todo', show_todo),
         CommandHandler('speed', show_speed),
@@ -757,14 +792,16 @@ round_handler = ConversationHandler(
         # Administrator commands used to be here. f
     ],
     states={
-        RECV_ANS: [MessageHandler(Filters.text, receive_ans)],
-        # HANDLE_WIN: [MessageHandler(Filters.photo, photo)]
+        RECV_ANS: [MessageHandler(filters.TEXT, receive_ans)],
+        # HANDLE_WIN: [MessageHandler(filters.PHOTO, photo)]
         # LOCATION: [
-        #     MessageHandler(Filters.location, location),
+        #     MessageHandler(filters.LOCATION, location),
         #     CommandHandler('skip', skip_location),
         # ],
-        # BIO: [MessageHandler(Filters.text & ~Filters.command, bio)],
+        # BIO: [MessageHandler(filters.TEXT & ~filters.COMMAND, bio)],
     },
     fallbacks=[CommandHandler('cancel', cancel_round)],
     per_user=False,
 )
+
+callback_query_handler = CallbackQueryHandler(button)

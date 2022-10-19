@@ -1,6 +1,5 @@
 import fire
-from telegram.ext import Updater
-from telegram.ext import CommandHandler
+from telegram.ext import CommandHandler, Application
 from pathlib import Path
 import time
 import os
@@ -49,12 +48,9 @@ def nation_game_bot(max_spam_lv=1):
     ################################
 
     utils.wait_until_connected(delay=20, trace=True)
-    updater = Updater(
+    app = Application.builder().token(
         token=(Path(__file__).parent.resolve() / 'token').read_text().strip(),
-        use_context=True
-    )
-    dispatcher = updater.dispatcher
-
+    ).build()
 
     #############
     # Bot Intro #
@@ -66,21 +62,21 @@ def nation_game_bot(max_spam_lv=1):
     # Handlers #
     ############
 
-    dispatcher.add_handler(
+    app.add_handler(
         CommandHandler(
             'register',
             register.handler
         )
     )
 
-    dispatcher.add_handler(
+    app.add_handler(
         CommandHandler(
             'regcommit',
             register.commit
         )
     )
 
-    dispatcher.add_handler(
+    app.add_handler(
         CommandHandler(
             'insult',
             lambda upd, ctx: ctx.bot.send_message(
@@ -92,7 +88,8 @@ def nation_game_bot(max_spam_lv=1):
 
     # Main handler used to interact with the game
     log(f'Nation game handler active (time: {cur_time()})', spam_lv=2)
-    dispatcher.add_handler(bot.round_handler)
+    app.add_handler(bot.round_handler)
+    app.add_handler(bot.callback_query_handler)
 
     ###################
     # Start Things Up #
@@ -135,16 +132,17 @@ def nation_game_bot(max_spam_lv=1):
     )
 
     # Create needed game folders / files
-    for path in paths.ALL_PATHS:
-        if not os.path.exists(path):
-            if path.is_file():
-                with open(path, 'w'):
-                    pass
-            else:
-                path.mkdir(parents=True)
+    # TODO: Fix this. It creates everything as a folder (log included)
+    # for path in paths.ALL_PATHS:
+    #     if not os.path.exists(path):
+    #         if path.is_file():
+    #             with open(path, 'w'):
+    #                 pass
+    #         else:
+    #             path.mkdir(parents=True)
 
     # Start bot
-    updater.start_polling()
+    app.run_polling()
 
 ###############
 # Entry Point #
