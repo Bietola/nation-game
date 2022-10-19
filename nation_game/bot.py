@@ -1,3 +1,4 @@
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import CommandHandler, ConversationHandler, MessageHandler
 from telegram.ext.filters import Filters
 from numbers import Number
@@ -302,6 +303,10 @@ def show_speed(upd, ctx):
     upd.message.reply_text(
         f'{db("sim-speed")}x'
     )
+    return ConversationHandler.END
+
+def show_map_scopes(upd, ctx):
+    upd.message.reply_text(f'{ALL_SCOPES}')
     return ConversationHandler.END
 
 def show_todo(upd, ctx):
@@ -747,7 +752,7 @@ round_handler = ConversationHandler(
         CommandHandler('todo', show_todo),
         CommandHandler('speed', show_speed),
         CommandHandler('dump', dump_log),
-        CommandHandler('scopes', lambda upd, ctx: upd.message.reply_text(f'{ALL_SCOPES}'))
+        CommandHandler('scopes', show_map_scopes)
 
         # Administrator commands used to be here. f
     ],
