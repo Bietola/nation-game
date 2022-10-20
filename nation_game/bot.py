@@ -1,4 +1,4 @@
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup
+from telegram import KeyboardButton, ReplyKeyboardMarkup, ReplyKeyboardRemove
 from telegram.ext import CommandHandler, CallbackQueryHandler, ConversationHandler, MessageHandler
 import telegram.ext.filters as filters
 from numbers import Number
@@ -364,6 +364,10 @@ async def show_world_map(upd, ctx):
     owner = ctx.args[0] if len(ctx.args) > 0 else 'Natives'
     scope = ctx.args[1] if len(ctx.args) > 1 else 'world'
     max_color_range = int(ctx.args[2]) if len(ctx.args) > 2 else 25000
+
+    # "map all ...": divide map in dominions using player colors
+    if owner == 'all':
+        get_color
 
     map_path = print_world_map(
         title=f'Armies of {owner}',
@@ -741,23 +745,36 @@ def lock_db(fun):
         db('lock').release()
     return ret
 
-async def button_launch(upd, ctx) -> None:
+async def test_button_launch(upd, ctx) -> None:
     """Sends a message with three inline buttons attached."""
+    # TODO/CC: Use command hints and sub-conversations instead of keyboard
     keyboard = [
         [
-            InlineKeyboardButton("Option 1", callback_data="1"),
-            InlineKeyboardButton("Option 2", callback_data="2"),
+            KeyboardButton("Deploy soldiers", callback_data="1"),
+            KeyboardButton("Define offensive", callback_data="2"),
+            KeyboardButton("Show map", callback_data="3"),
         ],
-        [InlineKeyboardButton("Option 3", callback_data="3")],
+        [
+            KeyboardButton("Show occupied territories", callback_data="4"),
+            KeyboardButton("Show log", callback_data="5")
+        ],
+        [
+            KeyboardButton("Build factories", callback_data="6"),
+        ]
     ]
 
-    reply_markup = InlineKeyboardMarkup(keyboard)
-
-    await upd.message.reply_text("Please choose:", reply_markup=reply_markup)
+    await upd.message.reply_text(
+        "Please choose:",
+        reply_markup=ReplyKeyboardRemove()
+        # reply_markup=ReplyKeyboardMarkup(
+        #     keyboard,
+        #     one_time_keyboard=True
+        # )
+    )
 
     return ConversationHandler.END
 
-async def button(upd, ctx) -> None:
+async def test_button(upd, ctx) -> None:
     """Parses the CallbackQuery and updates the message text."""
     query = upd.callback_query
 
@@ -767,9 +784,10 @@ async def button(upd, ctx) -> None:
 
     await query.edit_message_text(text=f"Selected option: {query.data}")
 
+
 round_handler = ConversationHandler(
     entry_points=[
-        CommandHandler('test', button_launch),
+        CommandHandler('test', test_button_launch),
         CommandHandler('help', show_help),
         CommandHandler('ng', start_round),
         CommandHandler('rank', show_ranking),
@@ -804,4 +822,4 @@ round_handler = ConversationHandler(
     per_user=False,
 )
 
-callback_query_handler = CallbackQueryHandler(button)
+callback_query_handler = CallbackQueryHandler(test_button)
