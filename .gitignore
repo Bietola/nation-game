@@ -1,6 +1,10 @@
 # !IMPORTANT! File that contains bot token, ignored to avoid people stealing the bot
 token
 
+# Chrome instance (TODO: Make it install chrome locally on machine)
+vinted_bot/chrome-linux64/
+vinted_bot/chromedriver-linux64/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

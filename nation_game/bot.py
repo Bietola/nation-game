@@ -138,12 +138,6 @@ def flush_db(field=None):
         pickle.dumps(to_pickle)
     )
 
-# Extract name of flag from flag emoji
-def extract_flag_name(flag_emoji_full_name):
-    return extract_flag_name.re.match(flag_emoji_full_name).group(1)
-
-extract_flag_name.re = re.compile(r'^flag:\s(.*)$')
-
 # 1 round of the game (record win)
 #
 # EXAMPLE:

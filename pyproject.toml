@@ -1,27 +1,15 @@
 [tool.poetry]
-name = "nation-game"
+name = "vinted-bot"
 version = "0.1.0"
 description = ""
 authors = ["Dincio"]
 
-[tool.poetry.scripts]
-nation-game = 'nation_game.main:cli'
-
 [tool.poetry.dependencies]
 python = "^3.8"
-fire = "^0.4.0"
-python-telegram-bot = {version = "20.0a0", allow-prereleases = true}
-graphviz = "^0.19.1"
-lenses = "^1.1.0"
-pandas = "^1.4.1"
-plotly = "^5.6.0"
-result = "^0.7.0"
-atomics = "^1.0.2"
-emoji = "^1.7.0"
-kaleido = "0.2.1"
-file-read-backwards = "^2.0.0"
-funcy = "^1.17"
-appdirs = "^1.4.4"
+python-telegram-bot = "^21.1.1"
+selenium = "^4.20.0"
+webdriver-manager = "^4.0.1"
+fire = "^0.6.0"
 
 [tool.poetry.dev-dependencies]
 
