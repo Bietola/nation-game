@@ -12,7 +12,7 @@ from selenium.webdriver.chrome.options import Options
 # from webdriver_manager.chrome import ChromeDriverManager
 from webdriver_manager.firefox import GeckoDriverManager
 
-def search_products(arg_query, logger):
+def init_browser(logger):
     # Setup chrome options
     chrome_options = Options()
     chrome_options.add_argument("--headless") # Ensure GUI is off
@@ -27,17 +27,27 @@ def search_products(arg_query, logger):
     # browser = webdriver.Firefox()
     browser = webdriver.Chrome(service=webdriver_service, options=chrome_options)
     browser.implicitly_wait(10)
-    
-    # Get page and accept cookies
+
+    # Go to website and reject cookies
     browser.get('https://www.vinted.it')
-    # browser.find_element(By.ID, 'onetrust-reject-all-handler').click()
     WebDriverWait(browser, 10).until(EC.element_to_be_clickable((By.XPATH,'//*[@id="onetrust-reject-all-handler"]'))).click()
     logger.info('Cookies rejected')
     
+    return browser
+    
+def search_products(browser, arg_query, logger, reject_cookies=False):
+    # Get page and accept cookies
+    browser.get('https://www.vinted.it')
+
+    # Deal with cookie banner (either reject or do nothing)
+    if reject_cookies:
+        WebDriverWait(browser, 10).until(EC.element_to_be_clickable((By.XPATH,'//*[@id="onetrust-reject-all-handler"]'))).click()
+        logger.info('Cookies rejected')
+
     # Extract search bar
     # search_input = WebDriverWait(browser, 10).until(EC.element_to_be_clickable((By.ID, 'search_text')))
     # search_input = browser.find_elements(By.ID, 'search_text')[1]
-    search_inputs = browser.find_elements(By.XPATH, '//input[@id="search_text" and @name="search_text"]')
+    search_inputs = browser.find_elements(By.XPATH, '//input[@id="search_text" and @name="search_text" and @class="web_ui__InputBar__value"]')
     logger.info(f'found {len(search_inputs)} search inputs, using the first')
     search_input = search_inputs[0]
     logger.info(f'search_input.tag_name [name: {search_input.tag_name}]')
@@ -58,7 +68,7 @@ def search_products(arg_query, logger):
             seller_link, product_link = product.find_elements(By.XPATH, ".//a[@href]")[0:2]
             q_sellers.append(seller_link.get_attribute('href'))
             q_products.append(product_link.get_attribute('href'))
-    
+
     # Quit
     # time.sleep(10)
     # browser.quit()

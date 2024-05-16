@@ -29,6 +29,9 @@ from telegram.ext import (
 
 import selenium_cmds as scmd
 
+# GLOBAL VARIABLES
+g_browser = None
+
 # Enable logging
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
@@ -132,15 +135,18 @@ async def search_query(update: Update, context: ContextTypes.DEFAULT_TYPE) -> in
     # logger.info("Bio of %s: %s", user.first_name, update.message.text)
     # await update.message.reply_text("Thank you! I hope we can talk again some day.")
 
+    global g_browser
+
     user = update.message.from_user
     query = update.message.text
     logger.info(f'{user.first_name} entered search query: {query}')
-    sellers, products = scmd.search_products(query, logger)
+    sellers, products = scmd.search_products(g_browser, query, logger)
     first_5 = '\n'.join(products[:5])
     reply_txt = f'Here are the first five products:\n{first_5}'
     await update.message.reply_text(reply_txt)
 
-    return ConversationHandler.END
+    # return ConversationHandler.END
+    return SEARCH_QUERY
 
 
 async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
@@ -155,6 +161,10 @@ async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 
 
 def main() -> None:
+    # Initialize the Selenium browser
+    global g_browser
+    g_browser = scmd.init_browser(logger)
+
     """Run the bot."""
     # Create the Application and pass it your bot's token.
     application = Application.builder().token(
