@@ -144,10 +144,7 @@ dmypy.json
 # Cython debug symbols
 cython_debug/
 
-# BEGIN CUSTOM
-# Game cache
-nation_game/data/cache/
-# Game data
-## nation_game/data/game-data/
-# Log (too big)
-nation_game/data/game-data/log.txt
+# Start of custom section
+vinted_bot/token
+vinted_bot/imgs
+vinted_bot/chrome*

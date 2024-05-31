@@ -1,6 +1,11 @@
 ## Run selenium and chrome driver to scrape data from cloudbytes.dev
 import time
 import os.path
+import re
+
+import requests
+from bs4 import BeautifulSoup
+
 from selenium import webdriver
 from selenium.webdriver import Keys
 from selenium.webdriver.chrome.service import Service
@@ -11,6 +16,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.chrome.options import Options
 # from webdriver_manager.chrome import ChromeDriverManager
 from webdriver_manager.firefox import GeckoDriverManager
+
 
 def init_browser(logger):
     # Setup chrome options
@@ -35,6 +41,29 @@ def init_browser(logger):
     
     return browser
     
+
+def search_products_soup(arg_query, logger):
+    response = requests.get('https://www.vinted.it/catalog?search_text={arg_query}')
+    soup = BeautifulSoup(response, 'html.parser')
+
+    # Find elements with the specified attributes
+    grid_items = soup.find_all('div', {'data-testid': 'grid-item', 'class': 'feed-grid__item'})
+
+    q_sellers = []
+    q_products = []
+
+    logger.log(f'Found {len(grid_items)} results to query')
+
+    for product in grid_items:
+        links = product.find_all('a', href=True)
+        if len(links) >= 2:
+            seller_link, product_link = links[0:2]
+            q_sellers.append(seller_link['href'])
+            q_products.append(product_link['href'])
+
+    return q_sellers, q_products
+
+
 def search_products(browser, arg_query, logger, reject_cookies=False):
     # Get page and accept cookies
     browser.get('https://www.vinted.it')
@@ -74,3 +103,20 @@ def search_products(browser, arg_query, logger, reject_cookies=False):
     # browser.quit()
 
     return q_sellers, q_products
+
+
+def extract_product_info(browser, product_link):
+    browser.get(product_link)
+    q_results = browser.find_elements(
+        By.XPATH,
+        r"//img[@class='web_ui__Image__content']"
+    )
+    # q_results = browser.find_elements(By.XPATH, r"//img[@class='web_ui__Image__content']")
+
+    links = []
+    for img in q_results:
+        attr_data_testid = str(img.get_attribute('data-testid'))
+        if re.match(r'item-photo-\d+--img', attr_data_testid):
+            links.append(img.get_attribute('src'))
+
+    return links
