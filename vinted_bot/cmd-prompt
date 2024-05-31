@@ -1,0 +1,15 @@
+These are all the possible commands:
+/help
+/search "Search query"
+/ask "Question with multiple words"
+/next
+/prev
+/details
+/buy
+/login "username" "pw"
+/wishlist-add
+
+Turn the following phrase into one of these commands, arguments included. Only answer with the command and the arguments.
+
+Any question should become an "ask" command. Any statement declaring a need for details or a more detailed description, a "details" command. Any other statement a "search" command.
+

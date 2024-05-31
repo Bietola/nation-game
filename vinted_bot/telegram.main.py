@@ -35,7 +35,7 @@ g_cursor = None
 
 
 # States
-TOP_COMMANDS, SEARCH_QUERY, TEST_SEARCH_QUERY = range(3)
+TOP_COMMANDS, SEARCH_QUERY, ASK_PROMPT, TEST_SEARCH_QUERY = range(4)
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
@@ -95,6 +95,27 @@ async def search_query(update: Update, context: ContextTypes.DEFAULT_TYPE) -> in
     return TOP_COMMANDS
 
 
+async def ask_prompt(upd: Update, ctx: ContextTypes.DEFAULT_TYPE) -> int:
+    global g_minicpm_ses
+    global g_cur_list
+    global g_cursor
+
+    # NB. Called to cache detailed description and set the current minicp_ses image to that of the product.
+    await upd.message.reply_text('Answering question...')
+    get_product_detailed_info(g_cur_list[g_cursor])
+
+    # Get msg.
+    user = upd.message.from_user
+    prompt = upd.message.text
+    logger.info(f'{user.first_name} entered ask prompt: {prompt}')
+
+    # Send it as prompt.
+    reply_txt = g_minicpm_ses.send_prompt(prompt)
+    await upd.message.reply_text(reply_txt)
+
+    return TOP_COMMANDS
+
+
 async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     user = update.message.from_user
     logger.info("User %s canceled the conversation.", user.first_name)
@@ -104,6 +125,89 @@ async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 
     return ConversationHandler.END
 
+async def tsearch_cmd(upd, ctx): return TEST_SEARCH_QUERY
+async def search_cmd(upd, ctx):
+    await upd.message.reply_text('Enter search query:')
+    return SEARCH_QUERY
+def gen_img_msg(product, idx, detailed=False):
+    global g_captioner, g_minicpm_ses
+    # Generate and cache img description.
+    if 'imgs' not in product:
+        product['imgs'] = [None for _ in product['img-links']]
+        product['img-quick-descs'] = [None for _ in product['img-links']]
+        product['img-descs'] = [None for _ in product['img-links']]
+    if product['imgs'][idx] == None:
+        img_path = Path(f'./imgs/{uuid.uuid4()}.jpg').resolve()
+        wget.download(product['img-links'][idx], str(img_path))
+        product['imgs'][idx] = img_path
+        # img = open(img_path, 'rb').read()
+        # product['img-descs'][idx] = g_captioner(product['img-links'])[0][0]['generated_text']
+        product['img-quick-descs'][idx] = g_captioner(
+            product['img-links'][idx]
+        )
+    # Generate and cache detailed img description
+    if detailed and product['img-descs'][idx] == None:
+        g_minicpm_ses.set_img(product['imgs'][idx])
+        product['img-descs'][idx] = g_minicpm_ses.send_prompt(
+            prompt='Describe this piece of clothing in details.',
+            sleep_t=5,
+            wait_for_msg_to_complete_t=10
+        )
+    # Compose msg based on required level of details
+    if detailed:
+        return product['img-links'][idx] + '\n\n' + str(product['img-descs'][idx])
+    else:
+        return product['img-links'][idx] + '\n\n' + str(product['img-quick-descs'][idx])
+def get_product_raw_info(product):
+    global g_browser
+    # Just a cache.
+    if 'img-links' not in product:
+        logger.info('Caching image links...')
+        product['img-links'] = scmd.extract_product_info(g_browser, product['link'])
+        return gen_img_msg(product, 0)
+    else:
+        return gen_img_msg(product, 0)
+def get_product_detailed_info(product):
+    global g_browser
+    # Just a cache.
+    if 'img-links' not in product:
+        logger.info('Caching image links...')
+        product['img-links'] = scmd.extract_product_info(g_browser, product['link'])
+        return gen_img_msg(product, 0, detailed=True)
+    else:
+        return gen_img_msg(product, 0, detailed=True)
+async def next_cmd(upd, ctx):
+    global g_cur_list
+    global g_cursor
+    if g_cursor == len(g_cur_list) - 1:
+        await upd.message.reply_text('Hit end of product list.')
+        return
+    g_cursor += 1
+    await upd.message.reply_text('Extracting product info...')
+    reply_txt = get_product_raw_info(g_cur_list[g_cursor])
+    await upd.message.reply_text(reply_txt)
+    return TOP_COMMANDS
+async def prev_cmd(upd, ctx):
+    global g_cur_list
+    global g_cursor
+    if g_cursor == 0:
+        await upd.message.reply_text('Hit beginning of product list.')
+        return
+    g_cursor -= 1
+    await upd.message.reply_text('Extracting product info...')
+    reply_txt = get_product_raw_info(g_cur_list[g_cursor])
+    await upd.message.reply_text(reply_txt)
+    return TOP_COMMANDS
+async def details_cmd(upd, ctx):
+    global g_cur_list
+    global g_cursor
+    await upd.message.reply_text('Extracting detailed description...')
+    reply_txt = get_product_detailed_info(g_cur_list[g_cursor])
+    await upd.message.reply_text(reply_txt)
+    return TOP_COMMANDS
+async def ask_cmd(upd, ctx):
+    await upd.message.reply_text('Enter question:')
+    return ASK_PROMPT
 
 def main() -> None:
     # Enable logging
@@ -145,86 +249,6 @@ def main() -> None:
     ).build()
 
     # Add conversation handler with the states GENDER, PHOTO, LOCATION and BIO
-    async def tsearch_cmd(upd, ctx): return TEST_SEARCH_QUERY
-    async def search_cmd(upd, ctx):
-        await upd.message.reply_text('Eneter search query:')
-        return SEARCH_QUERY
-    def gen_img_msg(product, idx, detailed=False):
-        global g_captioner, g_minicpm_ses
-        # Generate and cache img description.
-        if 'imgs' not in product:
-            product['imgs'] = [None for _ in product['img-links']]
-            product['img-quick-descs'] = [None for _ in product['img-links']]
-            product['img-descs'] = [None for _ in product['img-links']]
-        if product['imgs'][idx] == None:
-            img_path = Path(f'./imgs/{uuid.uuid4()}.jpg').resolve()
-            wget.download(product['img-links'][idx], str(img_path))
-            product['imgs'][idx] = img_path
-            # img = open(img_path, 'rb').read()
-            # product['img-descs'][idx] = g_captioner(product['img-links'])[0][0]['generated_text']
-            product['img-quick-descs'][idx] = g_captioner(
-                product['img-links'][idx]
-            )
-        # Generate and cache detailed img description
-        if detailed and product['img-descs'][idx] == None:
-            g_minicpm_ses.set_img(product['imgs'][idx])
-            product['img-descs'][idx] = g_minicpm_ses.send_prompt(
-                prompt='Describe this piece of clothing in details.',
-                sleep_t=5,
-                wait_for_msg_to_complete_t=10
-            )
-        # Compose msg based on required level of details
-        if detailed:
-            return product['img-links'][idx] + '\n\n' + str(product['img-descs'][idx])
-        else:
-            return product['img-links'][idx] + '\n\n' + str(product['img-quick-descs'][idx])
-    def get_product_raw_info(product):
-        global g_browser
-        # Just a cache.
-        if 'img-links' not in product:
-            logger.info('Caching image links...')
-            product['img-links'] = scmd.extract_product_info(g_browser, product['link'])
-            return gen_img_msg(product, 0)
-        else:
-            return gen_img_msg(product, 0)
-    def get_product_detailed_info(product):
-        global g_browser
-        # Just a cache.
-        if 'img-links' not in product:
-            logger.info('Caching image links...')
-            product['img-links'] = scmd.extract_product_info(g_browser, product['link'])
-            return gen_img_msg(product, 0, detailed=True)
-        else:
-            return gen_img_msg(product, 0, detailed=True)
-    async def next_cmd(upd, ctx):
-        global g_cur_list
-        global g_cursor
-        if g_cursor == len(g_cur_list) - 1:
-            await upd.message.reply_text('Hit end of product list.')
-            return
-        g_cursor += 1
-        await upd.message.reply_text('Extracting product info...')
-        reply_txt = get_product_raw_info(g_cur_list[g_cursor])
-        await upd.message.reply_text(reply_txt)
-        return TOP_COMMANDS
-    async def prev_cmd(upd, ctx):
-        global g_cur_list
-        global g_cursor
-        if g_cursor == 0:
-            await upd.message.reply_text('Hit beginning of product list.')
-            return
-        g_cursor -= 1
-        await upd.message.reply_text('Extracting product info...')
-        reply_txt = get_product_raw_info(g_cur_list[g_cursor])
-        await upd.message.reply_text(reply_txt)
-        return TOP_COMMANDS
-    async def details_cmd(upd, ctx):
-        global g_cur_list
-        global g_cursor
-        await upd.message.reply_text('Extracting detailed description...')
-        reply_txt = get_product_detailed_info(g_cur_list[g_cursor])
-        await upd.message.reply_text(reply_txt)
-        return TOP_COMMANDS
     conv_handler = ConversationHandler(
         entry_points=[CommandHandler("start", start)],
         states={
@@ -233,9 +257,11 @@ def main() -> None:
                 CommandHandler('search', search_cmd),
                 CommandHandler('next', next_cmd),
                 CommandHandler('prev', prev_cmd),
-                CommandHandler('details', details_cmd)
+                CommandHandler('details', details_cmd),
+                CommandHandler('ask', ask_cmd)
             ],
             SEARCH_QUERY: [MessageHandler(filters.TEXT & ~filters.COMMAND, search_query)],
+            ASK_PROMPT: [MessageHandler(filters.TEXT & ~filters.COMMAND, ask_prompt)],
             TEST_SEARCH_QUERY: [MessageHandler(filters.TEXT & ~filters.COMMAND, test_search_query)]
         },
         fallbacks=[CommandHandler("cancel", cancel)],
