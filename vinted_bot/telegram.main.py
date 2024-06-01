@@ -23,12 +23,14 @@ from telegram.ext import (
 
 import selenium_cmds as scmd
 import MiniCPM_Llama3_V_2_5_selenium as minicpm
+import mistral_selenium as mistral
 
 
 # GLOBAL VARIABLES
 logger = None
 g_browser = None
 g_minicpm_ses = None
+g_mistral_ses = None
 g_captioner = None
 g_cur_list = None
 g_cursor = None
@@ -234,13 +236,18 @@ def main() -> None:
     g_browser = scmd.init_browser(logger)
 
     # Initialize selenium browser for miniCPM visual prompter
-    logger.info('Initializing visual prompt model (selenium)...')
+    logger.info('Initializing visual prompt model browser (selenium)...')
     global g_minicpm_ses
     g_minicpm_ses = minicpm.Session(logger)
     # Test image.
     # g_minicpm_ses.set_img(
     #     '/home/dincio/code/vinted-bot/vinted_bot/imgs/dddbfca6-2a11-4d2c-ad5f-642e7c5d75e1.jpg'
     # )
+
+    # Initialize selenium browser for mistral prompt AI
+    logger.info('Initializing mistral browser (selenium)...')
+    global g_mistral_ses
+    g_mistral_ses = mistral.Session(logger)
 
     # Create the Application and pass it your bot's token.
     logger.info('Loading token...')
@@ -252,6 +259,7 @@ def main() -> None:
     conv_handler = ConversationHandler(
         entry_points=[CommandHandler("start", start)],
         states={
+            # TODO/CC: Add natural language commands using mistral
             TOP_COMMANDS: [
                 CommandHandler('tsearch', tsearch_cmd),
                 CommandHandler('search', search_cmd),
